@@ -205,7 +205,9 @@ services:
     environment:
       - WG_HOST= #你的域名
       - PASSWORD= #web端登录密码
-      - WG_DEFAULT_DNS=223.5.5.5，223.6.6.6
+      - WG_DEFAULT_DNS=223.5.5.5,223.6.6.6
+      - WG_DEFAULT_ADDRESS=192.168.5.x     # wg内分配的ip段 最后一位必须是x
+      - TZ=Asia/Shanghai
       - WG_MTU=1420
       - WG_PERSISTENT_KEEPALIVE=25
       - WG_PORT=11820  #自定义容器外端口
