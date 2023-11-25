@@ -1,2 +1,4 @@
 # unraid-docker-compose
-unraid docker compose file
+```bash
+docker compose /path/compose.yml up -d
+```
