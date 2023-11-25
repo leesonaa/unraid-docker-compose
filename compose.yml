@@ -15,7 +15,6 @@ services:
     container_name: jellyfin
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png"
-      net.unraid.docker.webui: "http://[host]:8096"
     ports: 
       - "8096:8096"
     volumes:
