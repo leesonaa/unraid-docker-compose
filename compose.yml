@@ -1,25 +1,34 @@
+x-config: &conf
+  restart: always
+  networks:
+    - mynet   
+ 
+x-environment: &env
+    TZ: Asia/Shanghai
+    PUID: "99"
+    PGID: "100"        
+
+# 上面创建锚点 下面使用
 services:
   jellyfin:
     image: nyanmisaka/jellyfin         # n大版jf 开箱即用
     container_name: jellyfin
     labels:
-      - net.unraid.docker.icon=https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png"
+      net.unraid.docker.webui: "http://[host]:8096"
     ports: 
       - "8096:8096"
     volumes:
       - /mnt/user/appdata/mydata/jf:/config      # 配置文件路径
       - /mnt/user/movie_data:/moviedata              # 媒体文件路径
       - /dev/shm/jf:/cache                           # 缓存进内存
-    environment: 
-      - TZ=Asia/Shanghai
-      - PUID=99
-      - PGID=100
+    <<: *conf
+    environment:
+      <<: *env
     privileged: "true"                               # 特权模式
     devices:
       - "/dev:/dev"
-    restart: always
-    networks:
-      - mynet
+
 
   emby:
     image: linuxserver/emby
@@ -32,16 +41,13 @@ services:
       - /mnt/user/appdata/mydata/emby:/config       # 配置文件路径
       - /mnt/user/movie_data:/moviedata                 # 媒体文件路径
       - /dev/shm/emby:/cache                            # 缓存进内存
-    environment: 
-      - TZ=Asia/Shanghai
-      - PUID=99
-      - PGID=100
+    <<: *conf
+    environment:
+      <<: *env
     privileged: "true"
     devices:
       - "/dev:/dev"
-    restart: always
-    networks:
-      - mynet   
+  
 
   nastools:    # v3版本
     image: hsuyelin/nas-tools
@@ -49,17 +55,13 @@ services:
     labels:
       - net.unraid.docker.icon=https://i.mji.rip/2023/11/07/ff7d5b863e297051d51fa340c0ad96c2.jpeg
     ports:
-      - "3000:3000"
+      - 3000:3000
     volumes:
       - /mnt/user/appdata/mydata/ntv3:/config          # 配置路径
       - /mnt/user/movie_data:/movie_data                   # 媒体文件和下载目录的公共的上层路径
+    <<: *conf
     environment:
-      - TZ=Asia/Shanghai
-      - PUID=99
-      - PGID=100
-    restart: always
-    networks:
-      - mynet
+      <<: *env
 
   qbittorrent:
     image: johngong/qbittorrent
@@ -67,37 +69,34 @@ services:
     labels:
       - net.unraid.docker.icon=https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png
     ports:
-      - "8989:8989"
-      - "6881:6881/tcp"
-      - "6881:6881/udp"
+      - 8989:8989
+      - 6881:6881/tcp
+      - 6881:6881/udp
     volumes:
       - /mnt/user/appdata/mydata/qb:/config             # 配置路径
       - /mnt/user/movie_data:/Downloads                     # 下载路径
+    <<: *conf
     environment:
-      - TZ=Asia/Shanghai
-      - PUID=99
-      - PGID=100
-      - QB_TRACKERS_UPDATE_AUTO="true"
-      - QB_TRACKERS_LIST_URL="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
-    restart: always
-    networks:
-      - mynet
+      <<: *env
+      QB_TRACKERS_UPDATE_AUTO: "true"
+      QB_TRACKERS_LIST_URL: https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt
+
 
   transmission:
     image: linuxserver/transmission
     container_name: transmission
     labels:
       - net.unraid.docker.icon=https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png
+    <<: *conf
     environment:
-      - PUID=99
-      - PGID=100
-      - TZ=Asia/Shanghai
-      - TRANSMISSION_WEB_HOME=/config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进/mnt/user/appdata/mydata/tr/目录下刷新
-      - USER=                                                 # 登录账户
-      - PASS=                                                 # 登录密码
-      - WHITELIST= #optional
-      - PEERPORT= #optional
-      - HOST_WHITELIST= #optional
+      <<: *env
+      TRANSMISSION_WEB_HOME: /config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进/mnt/user/appdata/mydata/tr/目录下刷新
+      USER:                                                 # 登录账户
+      PASS:                                                 # 登录密码
+      WHITELIST:  #optional
+      PEERPORT: #optional
+      HOST_WHITELIST:  #optional
+
     volumes:
       - /mnt/user/appdata/mydata/tr:/config               # 配置路径
       - /mnt/user/movie_data:/downloads                       # 下载路径
@@ -106,29 +105,24 @@ services:
       - 9091:9091
       - 51413:51413
       - 51413:51413/udp
-    restart: always
-    networks:
-      - mynet
+
 
   jackett:
     image: linuxserver/jackett:latest
     container_name: jackett
     labels:
       - net.unraid.docker.icon=https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png
+    <<: *conf
     environment:
-      - PUID=99
-      - PGID=100
-      - TZ=Asia/Shanghai
-      - AUTO_UPDATE=true #optional
-      # - RUN_OPTS= #optional
+      <<: *env
+      AUTO_UPDATE: "true" #optional
+      # RUN_OPTS:  #optional
     volumes:
       - /mnt/user/appdata/mydata/jk:/config
       - /mnt/user/movie_data:/downloads
     ports:
       - 9117:9117
-    restart: always
-    networks:
-      - mynet
+    
 
   chinesesubfinder:
     image: allanpk716/chinesesubfinder:latest-lite
@@ -138,15 +132,9 @@ services:
     volumes:
       - /mnt/user/appdata/mydata/csf:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
       - /mnt/user/movie_data:/movie_data    # 请修改为你的媒体目录，冒号右边可以改成你方便记忆的目录，多个媒体目录需要分别映射进来
+    <<: *conf
     environment:
-      - PUID=99         # uid
-      - PGID=100          # gid
-      - PERMS=true        # 是否重设/media权限
-      - TZ=Asia/Shanghai  # 时区
-      - UMASK=022         # 权限掩码
-    restart: always
-    networks:
-      - mynet
+      <<: *env
     ports:
       - 19035:19035
       - 19037:19037  # webui 的视频列表读取图片用，务必设置不要暴露到外网
@@ -160,17 +148,13 @@ services:
     container_name: cookiecloud
     labels:
       - net.unraid.docker.icon=https://img0.baidu.com/it/u=3556978365,880012798&fm=253&fmt=auto&app=138&f=JPEG?w=240&h=240
-    restart: always
-    environment:
-     - PUID=99
-     - PGID=100
-     - TZ=Asia/Shanghai
     volumes:
       - /mnt/user/appdata/mydata/cookiecloud:/data/api/data
     ports:
       - 8088:8088
-    networks:
-      - mynet
+    <<: *conf
+    environment:
+      <<: *env
 
   v2raya:
     image: mzz2017/v2raya
@@ -181,19 +165,16 @@ services:
     ports:
       - 2017:2017
       - 20170-20172:20170-20172
+    <<: *conf
     environment:
-      - PUID=99
-      - PGID=100
-      - TZ=Asia/Shanghai
-      - V2RAYA_LOG_FILE=/tmp/v2raya.log
-      - V2RAYA_V2RAY_BIN=/usr/local/bin/v2ray      # 这行注释掉默认使用xray-core
+      <<: *env
+      V2RAYA_LOG_FILE: "/tmp/v2raya.log"
+      V2RAYA_V2RAY_BIN: "/usr/local/bin/v2ray"      # 这行注释掉默认使用xray-core
     volumes:
       - /mnt/user/appdata/mydata/v2raya:/etc/v2raya
       - /lib/modules:/lib/modules:ro
       - /etc/resolv.conf:/etc/resolv.conf
-    restart: always
-    networks:
-      - mynet
+
 
   wg-easy:
     image: weejewel/wg-easy
@@ -203,27 +184,25 @@ services:
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      - WG_HOST= #你的域名
-      - PASSWORD= #web端登录密码
-      - WG_DEFAULT_DNS=223.5.5.5,223.6.6.6
-      - WG_DEFAULT_ADDRESS=192.168.5.x     # wg内分配的ip段 最后一位必须是x
-      - TZ=Asia/Shanghai
-      - WG_MTU=1420
-      - WG_PERSISTENT_KEEPALIVE=25
-      - WG_PORT=11820  #自定义容器外端口
-      - WG_ALLOWED_IPS= #默认0.0.0.0 允许互访ip段
+      WG_HOST: "you.domain.com" #你的域名
+      PASSWORD: "123456" #web端登录密码
+      WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
+      WG_MTU: "1420"
+      WG_PERSISTENT_KEEPALIVE: "25"
+      WG_PORT: "21820"  #自定义容器外端口
+      WG_DEFAULT_ADDRESS: "192.168.5.x"    # wg内分配的ip段 最后一位必须是x 
+      # WG_ALLOWED_IPS: ""     #默认0.0.0.0/24 允许互访ip段 
+      TZ: Asia/Shanghai
     ports:
-      - 11820:51820/udp
-      - 51821:51821/tcp
-    restart: always
+      - "21820:51820/udp"
+      - "51821:51821/tcp"
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
-    networks:
-      - mynet
+    <<: *conf
 
   alist:
     image: xhofe/alist
@@ -235,27 +214,25 @@ services:
     volumes:
       - /mnt/user/appdata/mydata/alist:/opt/alist/data
     # - /mnt/user/movie_data:/mydata            # 这里写自己要共享的路径映射
+    <<: *conf
     environment:
-      - TZ=Asia/Shanghai
-    networks:
-      - mynet
+      <<: *env
+      PUID: "0"
+      PGID: "0"
+      UMASK: "022"
 
   lucky:
     image: gdy666/lucky
     container_name: lucky
     labels:
       - net.unraid.docker.icon=https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png
-    ports:
-      - 16601:16601
-      - 4443:4443      # 此为 入站监听端口 左右皆可可修改
     volumes:
       - /mnt/user/appdata/mydata/lucky:/goodluck
-    networks:
-      - mynet
+    network_mode: host
     restart: always
 
 
-  
+# 自定义网卡 驱动为桥接  
 networks:
   mynet:
     name: mnet
