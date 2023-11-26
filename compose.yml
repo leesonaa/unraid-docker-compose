@@ -3,7 +3,7 @@ x-config: &conf
   networks:
     - mynet   
  
-x-environment: &env
+x-environment: &env           # unraid权限设置
     TZ: Asia/Shanghai
     PUID: "99"
     PGID: "100"        
@@ -14,7 +14,7 @@ services:
     image: nyanmisaka/jellyfin         # n大版jf 开箱即用
     container_name: jellyfin
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/ebb51c733b0faaa3500aabbd7e52f3f9.th.jpeg"      
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png"
     ports: 
       - "8096:8096"
     volumes:
@@ -33,7 +33,7 @@ services:
     image: linuxserver/emby
     container_name: emby
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/bb5c38d12b8231ef664b669e91296b08.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Emby/icon.png"
     ports:
       - 8097:8096
     volumes:
@@ -52,7 +52,7 @@ services:
     image: hsuyelin/nas-tools
     container_name: nas-tools
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/d00727f67ebff1cb93258c10bd889110.th.jpeg"
+      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Nastools_A.png?raw=true"
     ports:
       - 3000:3000
     volumes:
@@ -66,7 +66,7 @@ services:
     image: johngong/qbittorrent
     container_name: qbittorrent
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/b3569c545d63bcc064c86911b836d1d2.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png"
     ports:
       - 8989:8989
       - 6881:6881/tcp
@@ -78,14 +78,14 @@ services:
     environment:
       <<: *env
       QB_TRACKERS_UPDATE_AUTO: "true"
-      QB_TRACKERS_LIST_URL: https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt
+      QB_TRACKERS_LIST_URL: "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
 
 
   transmission:
     image: linuxserver/transmission
     container_name: transmission
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/ef9ef3ee8bed865158742ffb05f99f6d.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png"
     <<: *conf
     environment:
       <<: *env
@@ -110,7 +110,7 @@ services:
     image: linuxserver/jackett:latest
     container_name: jackett
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/76372ba657747086960361774ce701d7.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png"
     <<: *conf
     environment:
       <<: *env
@@ -127,7 +127,7 @@ services:
     image: allanpk716/chinesesubfinder:latest-lite
     container_name: chinesesubfinder
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/ed1caf22812607ce11a27a011e7a50ed.th.jpeg"
+      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Chinesesubfinder_A.png?raw=true"
     volumes:
       - /mnt/user/appdata/mydata/csf:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
       - /mnt/user/movie_data:/movie_data    # 请修改为你的媒体目录，冒号右边可以改成你方便记忆的目录，多个媒体目录需要分别映射进来
@@ -146,7 +146,7 @@ services:
     image: easychen/cookiecloud
     container_name: cookiecloud
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/6295a6418e90adb83b16831783515717.th.jpeg"
+      net.unraid.docker.icon: "https://github.com/easychen/CookieCloud/raw/master/extension/assets/icon.png"
     volumes:
       - /mnt/user/appdata/mydata/cookiecloud:/data/api/data
     ports:
@@ -159,7 +159,7 @@ services:
     image: mzz2017/v2raya
     container_name: v2raya
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/6d06e24c76633bac036958ebe53b26b7.th.jpeg"
+      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/V2raya_D.png?raw=true"
     privileged: "true"
     ports:
       - 2017:2017
@@ -179,11 +179,11 @@ services:
     image: weejewel/wg-easy
     container_name: wg
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/1a58ae835a824a605e6e51386ef3c5c4.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/WireGuardEasy/icon.png"
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      - WG_HOST=nas.playnas.online #你的域名
+      - WG_HOST=you.domain.com #你的域名
       - PASSWORD=123456 #web端登录密码
       - WG_DEFAULT_DNS=223.5.5.5,223.6.6.6
       - WG_MTU=1420
@@ -207,7 +207,7 @@ services:
     image: xhofe/alist
     container_name: alist
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/235ca93656dec38e6691dee682f9802d.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Alist/icon.png"
     ports:
       - 5244:5244
     volumes:
@@ -224,12 +224,47 @@ services:
     image: gdy666/lucky
     container_name: lucky
     labels:
-      net.unraid.docker.icon: "https://i.miji.bid/2023/11/25/fe6cc878f90c73058ef518437b8564d8.th.jpeg"
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
     volumes:
       - /mnt/user/appdata/mydata/lucky:/goodluck
     network_mode: host
     restart: always
 
+
+  nascab:
+    image: ypptec/nascab
+    container_name: nascab
+    labels:
+      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Nascab_A.png?raw=true"
+    ports:
+      - 81:80  # http port
+      - 90:90  # webdav port
+    volumes:
+      - /mnt/user/appdata/mydata/nascab:/root/.local/share/nascab
+     #- /mnt/user/appdata/photo:/mydata           # 映射自己的数据 比如影音 照片等等
+    <<: *conf
+    environment:
+      <<: *env
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+  webos:
+    image: fs185085781/webos
+    container_name: webos
+    labels:
+      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Webos_A.png?raw=true"
+    ports:
+      - 8087:8088
+    volumes:
+      - /mnt/user/appdata/mydata/webos/config:/webos/api/rootPath   # 配置持久化
+      - /mnt/user/appdata/mydata/webos/apps:/webos/web/apps         # 插件app持久化
+    # - /mnt/user/appdata/mydata:/mydata       # 挂载宿主
+    <<: *conf
+    environment:
+      <<: *env
 
 # 自定义网卡 驱动为桥接  
 networks:
