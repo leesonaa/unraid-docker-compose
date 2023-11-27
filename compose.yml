@@ -52,7 +52,7 @@ services:
     image: hsuyelin/nas-tools
     container_name: nas-tools
     labels:
-      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Nastools_A.png?raw=true"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nastools_A.png"
     ports:
       - 3000:3000
     volumes:
@@ -127,7 +127,7 @@ services:
     image: allanpk716/chinesesubfinder:latest-lite
     container_name: chinesesubfinder
     labels:
-      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Chinesesubfinder_A.png?raw=true"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Chinesesubfinder_A.png"
     volumes:
       - /mnt/user/appdata/mydata/csf:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
       - /mnt/user/movie_data:/movie_data    # 请修改为你的媒体目录，冒号右边可以改成你方便记忆的目录，多个媒体目录需要分别映射进来
@@ -146,7 +146,7 @@ services:
     image: easychen/cookiecloud
     container_name: cookiecloud
     labels:
-      net.unraid.docker.icon: "https://github.com/easychen/CookieCloud/raw/master/extension/assets/icon.png"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Cookiecloud_A.png"
     volumes:
       - /mnt/user/appdata/mydata/cookiecloud:/data/api/data
     ports:
@@ -159,7 +159,7 @@ services:
     image: mzz2017/v2raya
     container_name: v2raya
     labels:
-      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/V2raya_D.png?raw=true"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/V2raya_A.png"
     privileged: "true"
     ports:
       - 2017:2017
@@ -183,15 +183,15 @@ services:
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      - WG_HOST=you.domain.com #你的域名
-      - PASSWORD=123456 #web端登录密码
-      - WG_DEFAULT_DNS=223.5.5.5,223.6.6.6
-      - WG_MTU=1420
-      - WG_PERSISTENT_KEEPALIVE=25
-      - WG_PORT=21820  #自定义容器外端口
-      - WG_DEFAULT_ADDRESS=192.168.5.x     # wg内分配的ip段 最后一位必须是x 
-      # - WG_ALLOWED_IPS=     #默认0.0.0.0/24 允许互访ip段 
-      - TZ=Asia/Shanghai
+      WG_HOST: "you.domain.com" #你的域名
+      PASSWORD: "123456" #web端登录密码
+      WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
+      WG_MTU: "1420"
+      WG_PERSISTENT_KEEPALIVE: "25"
+      WG_PORT: "21820"  #自定义容器外端口
+      WG_DEFAULT_ADDRESS: "192.168.5.x"     # wg内分配的ip段 最后一位必须是x 
+      # WG_ALLOWED_IPS: "0.0.0.0/24,192.168.31.0/24"     #默认0.0.0.0/24 允许互访ip段 
+      <<: *env
     ports:
       - "21820:51820/udp"
       - "51821:51821/tcp"
@@ -235,7 +235,7 @@ services:
     image: ypptec/nascab
     container_name: nascab
     labels:
-      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Nascab_A.png?raw=true"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nascab_A.png"
     ports:
       - 81:80  # http port
       - 90:90  # webdav port
@@ -250,12 +250,12 @@ services:
         max-size: "10m"
         max-file: "3"
 
-
+# ————————————————————————————————————————————  这一段是webos的相关配置  ————————————————————————————————————————————————————————————————————————————————
   webos:
     image: fs185085781/webos
     container_name: webos
     labels:
-      net.unraid.docker.icon: "https://github.com/leesonaa/icons/blob/main/icons1/Webos_A.png?raw=true"
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Webos_A.png"
     ports:
       - 8087:8088
     volumes:
@@ -265,6 +265,98 @@ services:
     <<: *conf
     environment:
       <<: *env
+    depends_on:
+      - redis-webos
+      - mariadb-webos
+
+  redis-webos:
+    image: redis
+    container_name: redis-webos
+    labels:
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
+    ports:
+      - 6379:6379
+    <<: *conf
+    environment:
+      <<: *env
+
+  mariadb-webos:
+    image: mariadb
+    container_name: mariadb-webos
+    labels: 
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/MariaDB/icon.png"
+    ports:
+      - 3306:3306
+    volumes:
+      - /mnt/user/appdata/mydata/mariadb/mariadb-webos-data:/var/lib/mysql          # 数据库文件路径
+      - /mnt/user/appdata/mydata/mariadb/mariadb-webos-config:/etc/mysql/conf.d     # 配置文件路径
+    environment:
+      <<: *env
+      MYSQL_ROOT_PASSWORD: "webos"                  # 数据库root密码
+      MYSQL_DATABASE: "webos"                       # 数据库 名
+      MYSQL_USER: 'webos'                          # 数据库 用户
+      MYSQL_PASSWORD: "webos"                       # 数据库用户 密码
+    <<: *conf
+# ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————      
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    labels:
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Adminer_A.png"
+    ports:
+      - 8080:8080
+    <<: *conf
+    environment:
+      <<: *env
+      ADMINER_DESIGN: "pepa-linha-dark"          # 主题 填名称  https://www.adminer.org/  首页有主题名
+      ADMINER_PLUGINS: "json-column"             # 插件 填名称  https://www.adminer.org/  首页有插件页进去
+
+# ———————————————— aria2后端 ————————————————————————————————————————————————————————————————————————
+  aria2:
+    container_name: aria2
+    image: p3terx/aria2-pro
+    labels:
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
+    ports:
+      - 6800:6800
+      - 6888:6888/tcp
+      - 6888:6888/udp
+    environment:
+      <<: *env
+      RPC_SECRET: "password"       # WebUI 连接时需要填写的密码
+      RPC_PORT: "6800"             # RPC 端口设置
+      LISTEN_PORT: "6888"          # BT 监听端口（TCP）、DHT 监听端口（UDP）设置
+      DISK_CACHE: "64M"            # 磁盘缓存设置，默认值64M
+      IPV6_MODE: "false"           # IPv6 模式
+      UPDATE_TRACKERS: "true"      # 更新trakers
+      CUSTOM_TRACKER_URL: "https://cf.trackerslist.com/best.txt"          # trackers 列表
+    volumes:
+      - /mnt/user/appdata/mydata/aria2:/config
+      - /mnt/user/movie_data:/downloads
+    <<: *conf
+    logging:
+      driver: json-file
+      options:
+        max-size: "1M"
+
+# ———————————————— aria2前端 ————————————————————————————————————————————————————————————————————————
+  ariang:
+    container_name: ariang
+    image: p3terx/ariang
+    labels:
+      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
+    ports:
+      - 6880:6880
+    <<: *conf
+    environment:
+      <<: *env
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+
+# ——————————————————————————————————————————————————————————————————————————————————————————————————————
 
 # 自定义网卡 驱动为桥接  
 networks:
