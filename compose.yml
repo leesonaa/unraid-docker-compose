@@ -18,7 +18,7 @@ services:
 #
 #          2. 你需要替换你的路径 成为你的路径 
 #
-#          3. 当你昨晚上面2个步骤之后 你把这个全部复制进compose插件 这是针对unraid的
+#          3. 当你做完上面2个步骤之后 你把这个全部复制进compose插件 这是针对unraid的
 #             如果你不是unriad的话,找个地方 直接nano/vi compose.yml 然后粘贴 保存退出
 #
 #
