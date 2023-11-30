@@ -1,5 +1,5 @@
 x-config: &conf
-  restart: always
+  restart: unless-stopped
   networks:
     - mynet   
  
@@ -10,11 +10,77 @@ x-environment: &env           # unraid权限设置
 
 # 上面创建锚点 下面使用
 services:
-  jellyfin:
+#   readme: 
+#
+#      这是一个自用项目 目的就是能迅速的起来自己需要的这些容器
+#          1. 你需要做的是 ☆ 批量替换 192.168.100.2 为你自己的服务器ip ☆
+#                当然你要不是unraid 那无所谓
+#
+#          2. 你需要替换你的路径 成为你的路径 
+#
+#          3. 当你昨晚上面2个步骤之后 你把这个全部复制进compose插件 这是针对unraid的
+#             如果你不是unriad的话,找个地方 直接nano/vi compose.yml 然后粘贴 保存退出
+#
+#
+#           4. 执行docker compose up -d 等待拉取镜像运行镜像就OK了。
+#
+#  
+#
+#
+#
+# **********************************************  数据库 && 管理工具 *********************************************************** 
+  mdb:
+    image: mariadb
+    container_name: mariadb
+    labels: 
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/MariaDB/icon.png"
+    ports:
+      - 3306:3306
+    volumes:
+      - /mnt/user/appdata/mydata/mariadb:/var/lib/mysql          # 数据库文件路径
+      #- /mnt/user/appdata/mydata/mariadb/youconf:/etc/mysql/conf.d     # 自己写的 配置文件路径
+    environment:
+      <<: *env
+      MYSQL_ROOT_PASSWORD: "mariadb"                  # 数据库root密码
+      #MYSQL_DATABASE: "mariadb"                         # 数据库 名
+      #MYSQL_USER: "mariadb"                          # 数据库 用户
+      #MYSQL_PASSWORD: "mariadb"                       # 数据库用户 密码
+    <<: *conf
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Adminer_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8080"
+    ports:
+      - 8080:8080
+    <<: *conf
+    environment:
+      <<: *env
+      ADMINER_DESIGN: "pepa-linha-dark"          # 主题 填名称  https://www.adminer.org/  首页有主题名
+      ADMINER_PLUGINS: "json-column"             # 插件 填名称  https://www.adminer.org/  首页有插件页进去
+
+
+  redis:
+    image: redis
+    container_name: redis
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
+    ports:
+      - 6379:6379
+    <<: *conf
+    environment:
+      <<: *env
+
+# ******************************************************************************************************************** 
+
+  jf:
     image: nyanmisaka/jellyfin         # n大版jf 开箱即用
     container_name: jellyfin
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8096"
     ports: 
       - "8096:8096"
     volumes:
@@ -34,6 +100,7 @@ services:
     container_name: emby
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Emby/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8097"
     ports:
       - 8097:8096
     volumes:
@@ -48,13 +115,14 @@ services:
       - "/dev:/dev"
   
 
-  nastools:    # v3版本
+  nt:    # v3版本
     image: hsuyelin/nas-tools
     container_name: nas-tools
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nastools_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nastools_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:3001"
     ports:
-      - 3000:3000
+      - 3001:3000
     volumes:
       - /mnt/user/appdata/mydata/ntv3:/config          # 配置路径
       - /mnt/user/movie_data:/movie_data                   # 媒体文件和下载目录的公共的上层路径
@@ -62,11 +130,12 @@ services:
     environment:
       <<: *env
 
-  qbittorrent:
+  qb:
     image: johngong/qbittorrent
     container_name: qbittorrent
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8989"
     ports:
       - 8989:8989
       - 6881:6881/tcp
@@ -77,15 +146,17 @@ services:
     <<: *conf
     environment:
       <<: *env
+      QB_WEBUI_PORT: "8989"
       QB_TRACKERS_UPDATE_AUTO: "true"
-      QB_TRACKERS_LIST_URL: "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
+      QB_TRACKERS_LIST_URL: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
 
 
-  transmission:
+  tr:
     image: linuxserver/transmission
     container_name: transmission
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:9091"
     <<: *conf
     environment:
       <<: *env
@@ -105,12 +176,13 @@ services:
       - 51413:51413
       - 51413:51413/udp
 
-
-  jackett:
+# ———————— 黑色马甲一件 ——————————
+  jk:
     image: linuxserver/jackett:latest
     container_name: jackett
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:9117"
     <<: *conf
     environment:
       <<: *env
@@ -122,15 +194,16 @@ services:
     ports:
       - 9117:9117
     
-
-  chinesesubfinder:
+# —————— 字幕下载 ——————————
+  csf:
     image: allanpk716/chinesesubfinder:latest-lite
     container_name: chinesesubfinder
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Chinesesubfinder_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Chinesesubfinder_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:19035"
     volumes:
       - /mnt/user/appdata/mydata/csf:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
-      - /mnt/user/movie_data:/movie_data    # 请修改为你的媒体目录，冒号右边可以改成你方便记忆的目录，多个媒体目录需要分别映射进来
+      - /mnt/user/movie_data:/media    # 请修改为你的媒体目录，冒号右边必须是/media  否则报权限错
     <<: *conf
     environment:
       <<: *env
@@ -141,12 +214,12 @@ services:
         driver: "json-file"
         options:
           max-size: "100m" # 限制docker控制台日志大小，可自行调整
-
-  cookiecloud:
+# ———— PT佬必备 ————————————
+  cc:
     image: easychen/cookiecloud
     container_name: cookiecloud
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Cookiecloud_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Cookiecloud_A.png"
     volumes:
       - /mnt/user/appdata/mydata/cookiecloud:/data/api/data
     ports:
@@ -154,12 +227,13 @@ services:
     <<: *conf
     environment:
       <<: *env
-
-  v2raya:
+# ———— 懂的都懂 ——————
+  v2:
     image: mzz2017/v2raya
     container_name: v2raya
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/V2raya_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/V2raya_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:2017"
     privileged: "true"
     ports:
       - 2017:2017
@@ -168,29 +242,30 @@ services:
     environment:
       <<: *env
       V2RAYA_LOG_FILE: "/tmp/v2raya.log"
-      V2RAYA_V2RAY_BIN: "/usr/local/bin/v2ray"      # 这行注释掉默认使用xray-core
+      V2RAYA_V2RAY_BIN: "/usr/local/bin/v2ray"      # 这行注释掉就会默认使用xray-core
     volumes:
       - /mnt/user/appdata/mydata/v2raya:/etc/v2raya
       - /lib/modules:/lib/modules:ro
       - /etc/resolv.conf:/etc/resolv.conf
 
-
-  wg-easy:
+# —————— 超好用的wirguard ——————
+  wg:
     image: weejewel/wg-easy
     container_name: wg
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/WireGuardEasy/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:51821"
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      WG_HOST: "you.domain.com" #你的域名
-      PASSWORD: "123456" #web端登录密码
+      WG_HOST: "你的域名地址如 baidu.com  别加端口"                           #你的域名
+      PASSWORD: "123456"                                      #web端登录密码
       WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
       WG_MTU: "1420"
       WG_PERSISTENT_KEEPALIVE: "25"
-      WG_PORT: "21820"  #自定义容器外端口
-      WG_DEFAULT_ADDRESS: "192.168.5.x"     # wg内分配的ip段 最后一位必须是x 
-      # WG_ALLOWED_IPS: "0.0.0.0/24,192.168.31.0/24"     #默认0.0.0.0/24 允许互访ip段 
+      WG_PORT: "21820"                                       #自定义容器外端口
+      WG_DEFAULT_ADDRESS: "192.168.5.x"                      # wg内分配的ip段 最后一位必须是x 
+      # WG_ALLOWED_IPS: "0.0.0.0/24,192.168.31.0/24"         #默认0.0.0.0/24 允许互访ip段 
       <<: *env
     ports:
       - "21820:51820/udp"
@@ -202,12 +277,13 @@ services:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     <<: *conf
-
+# —————— alist  ————————
   alist:
     image: xhofe/alist
     container_name: alist
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Alist/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:5244"
     ports:
       - 5244:5244
     volumes:
@@ -219,23 +295,25 @@ services:
       PUID: "0"
       PGID: "0"
       UMASK: "022"
-
+# ——————  公网利器 ————————
   lucky:
     image: gdy666/lucky
     container_name: lucky
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
+      net.unraid.docker.webui: "http://192.168.100.2:16601"
     volumes:
       - /mnt/user/appdata/mydata/lucky:/goodluck
     network_mode: host
     restart: always
 
-
-  nascab:
+# ——————— nascab —————————
+  cab:
     image: ypptec/nascab
     container_name: nascab
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nascab_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nascab_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:81"
     ports:
       - 81:80  # http port
       - 90:90  # webdav port
@@ -250,12 +328,13 @@ services:
         max-size: "10m"
         max-file: "3"
 
-# ————————————————————————————————————————————  这一段是webos的相关配置  ————————————————————————————————————————————————————————————————————————————————
+# ———————  这一段是webos的相关配置  ————————
   webos:
     image: fs185085781/webos
     container_name: webos
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Webos_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Webos_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8087"
     ports:
       - 8087:8088
     volumes:
@@ -266,62 +345,20 @@ services:
     environment:
       <<: *env
     depends_on:
-      - redis-webos
-      - mariadb-webos
-
-  redis-webos:
-    image: redis
-    container_name: redis-webos
-    labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
-    ports:
-      - 6379:6379
-    <<: *conf
-    environment:
-      <<: *env
-
-  mariadb-webos:
-    image: mariadb
-    container_name: mariadb-webos
-    labels: 
-      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/MariaDB/icon.png"
-    ports:
-      - 3306:3306
-    volumes:
-      - /mnt/user/appdata/mydata/mariadb/mariadb-webos-data:/var/lib/mysql          # 数据库文件路径
-      - /mnt/user/appdata/mydata/mariadb/mariadb-webos-config:/etc/mysql/conf.d     # 配置文件路径
-    environment:
-      <<: *env
-      MYSQL_ROOT_PASSWORD: "webos"                  # 数据库root密码
-      MYSQL_DATABASE: "webos"                       # 数据库 名
-      MYSQL_USER: 'webos'                          # 数据库 用户
-      MYSQL_PASSWORD: "webos"                       # 数据库用户 密码
-    <<: *conf
-# ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————      
-
-  adminer:
-    image: adminer
-    container_name: adminer
-    labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Adminer_A.png"
-    ports:
-      - 8080:8080
-    <<: *conf
-    environment:
-      <<: *env
-      ADMINER_DESIGN: "pepa-linha-dark"          # 主题 填名称  https://www.adminer.org/  首页有主题名
-      ADMINER_PLUGINS: "json-column"             # 插件 填名称  https://www.adminer.org/  首页有插件页进去
+      - redis
+      - mdb     
 
 # ———————————————— aria2后端 ————————————————————————————————————————————————————————————————————————
   aria2:
     container_name: aria2
     image: p3terx/aria2-pro
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
+      net.unraid.docker.webui: "http://192.168.100.2:6880"
     ports:
       - 6800:6800
       - 6888:6888/tcp
-      - 6888:6888/udp
+      - 6888:6888/udp              # 请在路由器映射6888的tcp和udp端口
     environment:
       <<: *env
       RPC_SECRET: "password"       # WebUI 连接时需要填写的密码
@@ -336,7 +373,7 @@ services:
       - /mnt/user/movie_data:/downloads
     <<: *conf
     logging:
-      driver: json-file
+      driver: "json-file"
       options:
         max-size: "1M"
 
@@ -345,7 +382,8 @@ services:
     container_name: ariang
     image: p3terx/ariang
     labels:
-      net.unraid.docker.icon: "https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:6880"
     ports:
       - 6880:6880
     <<: *conf
@@ -356,7 +394,85 @@ services:
       options:
         max-size: 1m
 
-# ——————————————————————————————————————————————————————————————————————————————————————————————————————
+# ——————————— 签到 —————————————
+  qd:
+    image: qdtoday/qd
+    container_name: qiandao
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Qiandao_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8923"
+    ports:
+      - 8923:80
+    volumes:
+      - /mnt/user/appdata/mydata/qiandao:/usr/src/app/config
+    environment:
+      <<: *env
+      PROXIES: "v2:20172"   # 代理地址
+    <<: *conf
+
+# ——————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# 本项目需要搭配浏览器插件 并且在浏览器插件里填写相应的 ip 端口 以及有公网访问需求的话建议加token
+  kubespider:
+    image: cesign/kubespider
+    container_name: kubespider
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Kubespider_A.png"
+    depends_on:
+      - qb             
+      - aria2
+    environment:
+      <<: *env
+    ports:
+      - 3080:3080
+    volumes:
+      - /mnt/user/appdata/mydata/kubespider:/app/.config         # 去路径下 更改配置文件
+    <<: *conf
+
+# ————————  备忘录  ————————
+  memos:
+    image: ghcr.io/usememos/memos
+    container_name: memos
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Memos_A.png"
+      net.unraid.docker.webui: "http://192.168.100.2:5230"
+    volumes:
+      - /mnt/user/appdata/mydata/memos:/var/opt/memos
+    ports:
+      - 5230:5230
+    environment:
+      <<: *env 
+    <<: *conf
+
+# —————— syncthing同步 ————————
+  syncthing:
+    image: syncthing/syncthing
+    container_name: syncthing
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Syncthing_B.png"
+      net.unraid.docker.webui: "http://192.168.100.2:8384"
+    environment:
+      <<: *env
+    volumes:
+      - /mnt/user/appdata/mydata/sync:/var/syncthing 
+    network_mode: "host"
+
+# ———————— heimdall导航 ——————————————
+# css 文件 请参考 https://github.com/leesonaa/unraid-docker-compose 里heimdall css文件
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Heimdall_B.png"
+      net.unraid.docker.webui: "http://192.168.100.2:82"
+    environment:
+      <<: *env
+    volumes:
+      - /mnt/user/appdata/mydata/heimdall:/config
+    ports:
+      - 82:80
+    <<: *conf
+
+
 
 # 自定义网卡 驱动为桥接  
 networks:
