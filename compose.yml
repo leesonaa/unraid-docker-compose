@@ -10,32 +10,32 @@ x-environment: &env           # unraid权限设置
 
 # 上面创建锚点 下面使用
 services:
-#   readme: 
+#   注意事项: 
 #
 #      这是一个自用项目 目的就是能迅速的起来自己需要的这些容器
-#          1. 你需要做的是 ☆ 批量替换 192.168.100.2 为你自己的服务器ip ☆
-#                当然你要不是unraid 那无所谓
+# 
 #
-#          2. 你需要替换你的路径 成为你的路径 
+#          1. 你需要替换你的路径 成为你的路径 
 #
-#          3. 当你做完上面2个步骤之后 你把这个全部复制进compose插件 这是针对unraid的
+#          2. 当你做完上面这个步骤之后 你把这个全部复制进compose插件 这是针对unraid的
 #             如果你不是unriad的话,找个地方 直接nano/vi compose.yml 然后粘贴 保存退出
 #
+#          3. 执行docker compose up -d 等待拉取镜像运行镜像就OK了。
 #
-#           4. 执行docker compose up -d 等待拉取镜像运行镜像就OK了。
+#          4.joplin 修改APP_BASE_URL 为你服务器的ip，然后需要设置反向代理才能访问（一定要使用目标地址host，否则还是错），默认后端是http://服务器ip:22300 
 #
-#  
+#          5.Plex 第一次部署没法添加本地媒体库 解决方案 打开windows cmd 输入 ssh root@服务器IP -L 8888:localhost:32400
+#            然后打开你的浏览器输入 http://localhost:8888/web  就能正确配置了  然后下次就可以用你服务器ip:32400访问了
+#          6. transmission 下面有下载webui的界面地址和说明 
 #
-#
-#
-# **********************************************  数据库管理工具 *********************************************************** 
+# **********************************************  数据库管理 && 工具 *********************************************************** 
 
   adminer:
     image: adminer
     container_name: adminer
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Adminer_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8080"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8080]"
     ports:
       - 8080:8080
     <<: *conf
@@ -45,7 +45,16 @@ services:
       ADMINER_PLUGINS: "json-column"             # 插件 填名称  https://www.adminer.org/  首页有插件页进去
 
 
-
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Watchtower_A.png"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: "Asia/Shanghai"
+    network_mode: "host"
 
 # ******************************************************************************************************************** 
 
@@ -54,7 +63,7 @@ services:
     container_name: jellyfin
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jellyfin/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8096"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8096]"
     ports: 
       - "8096:8096"
     volumes:
@@ -74,7 +83,7 @@ services:
     container_name: emby
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Emby/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8097"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8097]"
     ports:
       - 8097:8096
     volumes:
@@ -88,13 +97,37 @@ services:
     devices:
       - "/dev:/dev"
   
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Plex_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:32400]"
+    ports:
+      - 32400:32400 
+      - 1900:1900/udp  
+      - 8324:8324 
+      - 32410:32410/udp 
+      - 32412:32412/udp 
+      - 32413:32413/udp 
+      - 32414:32414/udp 
+      - 32469:32469
+    environment:
+      <<: *env
+    volumes:
+      - /mnt/user/appdata/mydata/plex:/config
+      - /mnt/user/movie_data:/moviedata
+    <<: *conf
+    privileged: "true"
+    devices:
+      - "/dev:/dev"
 
   nt:    # v3版本
     image: hsuyelin/nas-tools
     container_name: nas-tools
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nastools_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:3001"
+      net.unraid.docker.webui: "http://[IP]:[PORT:3001]"
     ports:
       - 3001:3000
     volumes:
@@ -109,7 +142,7 @@ services:
     container_name: qbittorrent
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8989"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8989]"
     ports:
       - 8989:8989
       - 6881:6881/tcp
@@ -131,7 +164,7 @@ services:
     container_name: transmission
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:9091"
+      net.unraid.docker.webui: "http://[IP]:[PORT:9091]"
     <<: *conf
     environment:
       <<: *env
@@ -157,7 +190,7 @@ services:
     container_name: jackett
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:9117"
+      net.unraid.docker.webui: "http://[IP]:[PORT:9117]"
     <<: *conf
     environment:
       <<: *env
@@ -175,7 +208,7 @@ services:
     container_name: chinesesubfinder
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Chinesesubfinder_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:19035"
+      net.unraid.docker.webui: "http://[IP]:[PORT:19035]"
     volumes:
       - /mnt/user/appdata/mydata/chinesesubfinder:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
       - /mnt/user/movie_data:/media    # 请修改为你的媒体目录，冒号右边必须是/media  否则报权限错
@@ -208,7 +241,8 @@ services:
     container_name: v2raya
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/V2raya_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:2017"
+      net.unraid.docker.webui: "http://[IP]:[PORT:2017]"
+      com.centurylinklabs.watchtower.enable: "true"         # 设置watchtower 监控更新标签
     privileged: "true"
     ports:
       - 2017:2017
@@ -229,7 +263,7 @@ services:
     container_name: wg
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/WireGuardEasy/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:51821"
+      net.unraid.docker.webui: "http://[IP]:[PORT:51821]"
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
@@ -258,7 +292,7 @@ services:
     container_name: alist
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Alist/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:5244"
+      net.unraid.docker.webui: "http://[IP]:[PORT:5244]"
     ports:
       - 5244:5244
     volumes:
@@ -276,7 +310,7 @@ services:
     container_name: lucky
     labels:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
-      net.unraid.docker.webui: "http://192.168.100.2:16601"
+      net.unraid.docker.webui: "http://[IP]:[PORT:16601]"
     volumes:
       - /mnt/user/appdata/mydata/lucky:/goodluck
     network_mode: host
@@ -288,7 +322,7 @@ services:
     container_name: nascab
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Nascab_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:81"
+      net.unraid.docker.webui: "http://[IP]:[PORT:81]"
     ports:
       - 81:80  # http port
       - 90:90  # webdav port
@@ -309,7 +343,7 @@ services:
     container_name: webos
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Webos_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8087"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8087]"
     ports:
       - 8087:8088
     volumes:
@@ -357,7 +391,7 @@ services:
     image: p3terx/aria2-pro
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
-      net.unraid.docker.webui: "http://192.168.100.2:6880"
+      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
     ports:
       - 6800:6800
       - 6888:6888/tcp
@@ -386,7 +420,7 @@ services:
     image: p3terx/ariang
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:6880"
+      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
     ports:
       - 6880:6880
     <<: *conf
@@ -403,7 +437,7 @@ services:
     container_name: qiandao
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Qiandao_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8923"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8923]"
     ports:
       - 8923:80
     volumes:
@@ -420,6 +454,7 @@ services:
     container_name: kubespider
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Kubespider_A.png"
+      com.centurylinklabs.watchtower.enable: "true"
     depends_on:
       - qb             
       - aria2
@@ -433,11 +468,11 @@ services:
 
 # ————————  备忘录  ————————
   memos:
-    image: ghcr.io/usememos/memos
+    image: neosmemo/memos
     container_name: memos
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Memos_A.png"
-      net.unraid.docker.webui: "http://192.168.100.2:5230"
+      net.unraid.docker.webui: "http://[IP]:[PORT:5230]"
     volumes:
       - /mnt/user/appdata/mydata/memos:/var/opt/memos
     ports:
@@ -452,7 +487,7 @@ services:
     container_name: syncthing
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Syncthing_B.png"
-      net.unraid.docker.webui: "http://192.168.100.2:8384"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8384]"
     environment:
       <<: *env
     volumes:
@@ -466,7 +501,7 @@ services:
     container_name: heimdall
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Heimdall_B.png"
-      net.unraid.docker.webui: "http://192.168.100.2:82"
+      net.unraid.docker.webui: "http://[IP]:[PORT:82]"
     environment:
       <<: *env
     volumes:
@@ -481,7 +516,8 @@ services:
     container_name: qinglong
     labels:
       net.unraid.docker.icon: "https://user-images.githubusercontent.com/22700758/191449379-f9f56204-0e31-4a16-be5a-331f52696a73.png"
-      net.unraid.docker.webui: "http://192.168.100.2:5700"
+      net.unraid.docker.webui: "http://[IP]:[PORT:5700]"
+      com.centurylinklabs.watchtower.enable: "true"
     volumes:
       - /mnt/user/appdata/mydata/qinglong:/ql/data
     ports:
@@ -528,7 +564,7 @@ services:
     container_name: joplin
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/LinuxIcons/256x256.png"
-      net.unraid.docker.webui: "http://192.168.100.2:22300"
+      net.unraid.docker.webui: "http://[IP]:[PORT:22300]"
     depends_on:
       - joplinpg
     ports:
