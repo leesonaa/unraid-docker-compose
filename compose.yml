@@ -524,7 +524,7 @@ services:
       POSTGRES_DB: "joplin"                  # 创建一个其他数据库
   
   joplin:                                                       # joplin 主程序配置
-    image: joplin/linuxserver                                   # 默认账户 admin@localhost  密码 admin
+    image: joplin/server                                   # 默认账户 admin@localhost  密码 admin
     container_name: joplin
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/laurent22/joplin/dev/Assets/LinuxIcons/256x256.png"
