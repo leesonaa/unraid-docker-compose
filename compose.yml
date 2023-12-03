@@ -1,3 +1,4 @@
+name: myproject
 x-config: &conf
   restart: unless-stopped
   networks:
@@ -25,7 +26,9 @@ services:
 #          4.joplin 修改APP_BASE_URL 为你服务器的ip，然后需要设置反向代理才能访问（一定要使用目标地址host，否则还是错），默认后端是http://服务器ip:22300 
 #
 #          5.Plex 第一次部署没法添加本地媒体库 解决方案 打开windows cmd 输入 ssh root@服务器IP -L 8888:localhost:32400
-#            然后打开你的浏览器输入 http://localhost:8888/web  就能正确配置了  然后下次就可以用你服务器ip:32400访问了
+#            然后打开你的浏览器输入 http://localhost:8888/web  就能正确配置了  然后下次就可以用你服务器ip:32400访问了   
+#            当然你也可以用9999之类没有占用的端口即可
+#
 #          6. transmission 下面有下载webui的界面地址和说明 
 #
 # **********************************************  数据库管理 && 工具 *********************************************************** 
@@ -54,6 +57,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       TZ: "Asia/Shanghai"
+      WATCHTOWER_POLL_INTERVAL: "43200"  # 轮询时间 单位 秒
+      #WATCHTOWER_LABEL_ENABLE: "true"   # 监视并更新com.centurylinklabs.watchtower.enable标签设置为 true 的容器
+      WATCHTOWER_CLEANUP: "true"         # 清理玄虚镜像
+      WATCHTOWER_REMOVE_VOLUMES: "true"  # 删除匿名卷
+      WATCHTOWER_ROLLING_RESTART: "true" # 每次只停止并更新一个容器
+      
     network_mode: "host"
 
 # ******************************************************************************************************************** 
@@ -122,6 +131,22 @@ services:
     devices:
       - "/dev:/dev"
 
+  iyuu:
+    image: iyuucn/iyuuplus
+    container_name: iyuu
+    labels:
+      net.unraid.docker.icon: "https://iyuu.cn/usr/uploads/logo/logo_257.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8787]"
+    volumes:
+      - /mnt/user/appdata/mydata/iyuu:/IYUU/db
+      #- /mnt/user/appdata/mydata/qbittorrent/qBittorrent/data/BT_backup:/BT_backup  #冒号左边请修改为你自己的路径，如不使用qb，可删除本行
+      #- /mnt/user/appdata/mydata/transmission/torrents:/torrents   #冒号左边请修改为你自己的路径，如不使用tr，可删除本行
+    ports:
+      - 8787:8787
+    environment:
+      <<: *env
+    <<: *conf
+
   nt:    # v3版本
     image: hsuyelin/nas-tools
     container_name: nas-tools
@@ -136,6 +161,22 @@ services:
     <<: *conf
     environment:
       <<: *env
+  
+
+  mp:
+    image: jxxghp/moviepilot
+    container_name: moviepilot
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Moviepilot_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:3002]"
+    volumes:
+      - /mnt/user/appdata/mydata/moviepilot:/config
+      - /mnt/user/movie_data:/movie_data   # 要和下载器配置一致
+    ports:
+      - 3002:3000
+    env_file:
+      - ./app.env
+    <<: *conf
 
   qb:                                 # qb启动完成看日志  有随机密码  
     image: johngong/qbittorrent
@@ -267,7 +308,7 @@ services:
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      WG_HOST: "you.domain.com"                           #你的域名
+      WG_HOST: "you.domain.com"                           #你的域名地址 ！！！！不需要端口号
       PASSWORD: "123456"                                      #web端登录密码
       WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
       WG_MTU: "1420"
@@ -497,7 +538,7 @@ services:
 # ———————— heimdall导航 ——————————————
 # css 文件 请参考 https://github.com/leesonaa/unraid-docker-compose 里heimdall css文件
   heimdall:
-    image: lscr.io/linuxserver/heimdall:latest
+    image: linuxserver/heimdall
     container_name: heimdall
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Heimdall_B.png"
@@ -573,7 +614,7 @@ services:
     environment:
       <<: *env
       APP_PORT: "22300"
-      APP_BASE_URL: "http://192.168.100.2:22300"
+      APP_BASE_URL: "http://192.168.100.2:22300"       # 内网用就内网地址 外网用就外网地址
       DB_CLIENT: "pg"
       POSTGRES_PASSWORD: "joplin"
       POSTGRES_DATABASE: "joplin"
@@ -582,6 +623,9 @@ services:
       POSTGRES_HOST: "joplinpg"
 
 # ——————————————————————————————————————————————————————————————————————————————————————————
+
+
+
 # 自定义网卡 驱动为桥接  
 networks:
   mynet:
