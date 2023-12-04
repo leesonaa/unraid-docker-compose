@@ -535,20 +535,22 @@ services:
       - /mnt/user/appdata/mydata/sync:/var/syncthing 
     network_mode: "host"
 
-# ———————— heimdall导航 ——————————————
-# css 文件 请参考 https://github.com/leesonaa/unraid-docker-compose 里heimdall css文件
-  heimdall:
-    image: linuxserver/heimdall
-    container_name: heimdall
+# ———————— sun-panel导航面板 —————————————— user: admin@sun.cc  passwd: 12345678
+  sun-panel:
+    image: hslr/sun-panel
+    container_name: sun-panel
     labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Heimdall_B.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:82]"
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hslr-s/sun-panel/master/doc/images/logo.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:3003]"
+    volumes:
+    - /mnt/user/appdata/mydata/sun-panel/conf:/app/conf
+    - /mnt/user/appdata/mydata/sun-panel/uploads:/app/uploads
+    - /mnt/user/appdata/mydata/sun-panel/database:/app/database
+    # - ./runtime:/app/runtime   # 日志文件
+    ports:
+    - 3003:3002
     environment:
       <<: *env
-    volumes:
-      - /mnt/user/appdata/mydata/heimdall:/config
-    ports:
-      - 82:80
     <<: *conf
 
 # —————— 青龙 ——————————
