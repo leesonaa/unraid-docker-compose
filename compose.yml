@@ -133,7 +133,7 @@ services:
     volumes:
       - /mnt/user/appdata/mydata/emby:/config       # 配置文件路径
       - /mnt/user/movie_data:/moviedata                 # 媒体文件路径
-      - /dev/shm/emby:/dev/shm/emby                           # 缓存进内存
+      #- /dev/shm/emby:/dev/shm/emby                           # emby这条没用
     <<: *conf
     environment:
       <<: *env
