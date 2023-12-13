@@ -11,9 +11,9 @@ x-environment: &env           # unraid权限设置
 
 # 上面创建锚点 下面使用
 services:
-#   注意事项: 
+#   注意事项: ❗❗❗ ❗❗❗ 
 #
-#      这是一个自用项目 目的就是能迅速的起来自己需要的这些容器
+#      这是一个自用项目 目的就是能迅速的起来自己需要的这些容器 你可以选择性的删除一些段 因为这里面有一些是功能重合的
 # 
 #
 #          1. 你需要替换你的路径 成为你的路径 
@@ -62,11 +62,46 @@ services:
       WATCHTOWER_CLEANUP: "true"         # 清理玄虚镜像
       WATCHTOWER_REMOVE_VOLUMES: "true"  # 删除匿名卷
       WATCHTOWER_ROLLING_RESTART: "true" # 每次只停止并更新一个容器
-      
     network_mode: "host"
 
+  snapdrop:
+    image: linuxserver/snapdrop
+    container_name: snapdrop
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Snapdrop_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:84]"
+    environment:
+      <<: *env
+    volumes:
+      - /mnt/user/appdata/mydata/snapdrop:/config
+    ports:
+      - 84:80
+    <<: *conf
+# ******************************************************************************************************* 
+#  rclone:                                # 挂载是没问题就是重启后挂载失败 原因是重启前没有unmount
+#    image: d2dyno/rclone-gui
+#    container_name: rclone
+#    privileged: "true" 
+#    environment:
+#      TZ: "Asia/Shanghai"
+#      USER_ID: "0"
+#      GROUP_ID: "0"
+#      RCUSER: "admin"
+#      RCPASS: "password"
+#      HTTP_PROXY: "http://v2:20172"
+#      HTTPS_PROXY: "http://v2:20172"
+#    volumes:
+#      - /mnt/user/appdata/rclonebrowser:/config
+#      - /mnt/user/rclone-data:/media:shared
+#    ports:
+#      - 5572:5572
+#    devices:
+#      - "/dev/fuse:/dev/fuse"
+#    <<: *conf
 # ******************************************************************************************************************** 
 
+
+# ********************************************** 影音媒体类 ***********************************************************
   jf:
     image: nyanmisaka/jellyfin         # n大版jf 开箱即用
     container_name: jellyfin
@@ -98,7 +133,7 @@ services:
     volumes:
       - /mnt/user/appdata/mydata/emby:/config       # 配置文件路径
       - /mnt/user/movie_data:/moviedata                 # 媒体文件路径
-      - /dev/shm/emby:/cache                            # 缓存进内存
+      - /dev/shm/emby:/dev/shm/emby                           # 缓存进内存
     <<: *conf
     environment:
       <<: *env
@@ -130,7 +165,7 @@ services:
     privileged: "true"
     devices:
       - "/dev:/dev"
-
+# ********************************************** PT & BT 相关应用 ***********************************************************
   iyuu:
     image: iyuucn/iyuuplus
     container_name: iyuu
@@ -177,53 +212,6 @@ services:
     env_file:
       - ./app.env
     <<: *conf
-
-  qb:                                 # qb启动完成看日志  有随机密码  
-    image: johngong/qbittorrent
-    container_name: qbittorrent
-    labels:
-      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:8989]"
-    ports:
-      - 8989:8989
-      - 6881:6881/tcp
-      - 6881:6881/udp
-    volumes:
-      - /mnt/user/appdata/mydata/qbittorrent:/config             # 配置路径
-      - /mnt/user/movie_data:/Downloads                     # 下载路径
-    <<: *conf
-    environment:
-      UID: "99"
-      GID: "100"
-      QB_WEBUI_PORT: "8989"
-      QB_TRACKERS_UPDATE_AUTO: "true"
-      QB_TRACKERS_LIST_URL: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
-
-
-  tr:
-    image: linuxserver/transmission
-    container_name: transmission
-    labels:
-      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:9091]"
-    <<: *conf
-    environment:
-      <<: *env
-      TRANSMISSION_WEB_HOME: /config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进/mnt/user/appdata/mydata/tr/目录下刷新
-      USER:                                                 # 登录账户
-      PASS:                                                 # 登录密码
-      WHITELIST:  #optional
-      PEERPORT: #optional
-      HOST_WHITELIST:  #optional
-
-    volumes:
-      - /mnt/user/appdata/mydata/transmission:/config               # 配置路径
-      - /mnt/user/movie_data:/downloads                       # 下载路径
-      # - /path/to/watch/folder:/watch
-    ports:
-      - 9091:9091
-      - 51413:51413
-      - 51413:51413/udp
 
 # ———————— 黑色马甲一件 ——————————
   jk:
@@ -276,6 +264,119 @@ services:
     <<: *conf
     environment:
       <<: *env
+
+# 本项目需要搭配浏览器插件 并且在浏览器插件里填写相应的 ip 端口 以及有公网访问需求的话建议在配置文件里开启并加上token
+  kubespider:
+    image: cesign/kubespider
+    container_name: kubespider
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Kubespider_A.png"
+      com.centurylinklabs.watchtower.enable: "true"
+    depends_on:
+      - qb             
+      - aria2
+    environment:
+      <<: *env
+    ports:
+      - 3080:3080
+    volumes:
+      - /mnt/user/appdata/mydata/kubespider:/app/.config         # 去路径下 更改配置文件
+    <<: *conf
+# **********************************************  下载器类 ***********************************************************
+  qb:                                 # qb启动完成看日志  有随机密码  
+    image: johngong/qbittorrent
+    container_name: qbittorrent
+    labels:
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/qBittorrent/icon.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8989]"
+    ports:
+      - 8989:8989
+      - 6881:6881/tcp
+      - 6881:6881/udp
+    volumes:
+      - /mnt/user/appdata/mydata/qbittorrent:/config             # 配置路径
+      - /mnt/user/movie_data:/Downloads                     # 下载路径
+    <<: *conf
+    environment:
+      UID: "99"
+      GID: "100"
+      QB_WEBUI_PORT: "8989"
+      QB_TRACKERS_UPDATE_AUTO: "true"
+      QB_TRACKERS_LIST_URL: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
+
+
+  tr:
+    image: linuxserver/transmission
+    container_name: transmission
+    labels:
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Transmission/icon.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:9091]"
+    <<: *conf
+    environment:
+      <<: *env
+      TRANSMISSION_WEB_HOME: /config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进/mnt/user/appdata/mydata/tr/目录下刷新
+      USER:                                                 # 登录账户
+      PASS:                                                 # 登录密码
+      WHITELIST:  #optional
+      PEERPORT: #optional
+      HOST_WHITELIST:  #optional
+
+    volumes:
+      - /mnt/user/appdata/mydata/transmission:/config               # 配置路径
+      - /mnt/user/movie_data:/downloads                       # 下载路径
+      # - /path/to/watch/folder:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+
+# ———————————————— aria2后端 ———————————
+  aria2:
+    container_name: aria2
+    image: p3terx/aria2-pro
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
+    ports:
+      - 6800:6800
+      - 6888:6888/tcp
+      - 6888:6888/udp              # 请在路由器映射6888的tcp和udp端口
+    environment:
+      <<: *env
+      RPC_SECRET: "password"       # WebUI 连接时需要填写的密码
+      RPC_PORT: "6800"             # RPC 端口设置
+      LISTEN_PORT: "6888"          # BT 监听端口（TCP）、DHT 监听端口（UDP）设置
+      DISK_CACHE: "64M"            # 磁盘缓存设置，默认值64M
+      IPV6_MODE: "false"           # IPv6 模式
+      UPDATE_TRACKERS: "true"      # 更新trakers
+      CUSTOM_TRACKER_URL: "https://cf.trackerslist.com/best.txt"          # trackers 列表
+    volumes:
+      - /mnt/user/appdata/mydata/aria2:/config
+      - /mnt/user/movie_data:/downloads
+    <<: *conf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1M"
+
+# ———————————————— aria2前端 —————————————
+  ariang:
+    container_name: ariang
+    image: p3terx/ariang
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
+    ports:
+      - 6880:6880
+    <<: *conf
+    environment:
+      <<: *env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1M"
+
+# **********************************************  科学类 ***********************************************************
 # ———— 懂的都懂 ——————
   v2:
     image: mzz2017/v2raya
@@ -308,7 +409,7 @@ services:
     volumes:
       -  /mnt/user/appdata/mydata/wg:/etc/wireguard
     environment:
-      WG_HOST: "you.domain.com"                           #你的域名地址 ！！！！不需要端口号
+      WG_HOST: "you.domain.com"                           #❗❗❗ 你的域名地址 不要加协议头
       PASSWORD: "123456"                                      #web端登录密码
       WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
       WG_MTU: "1420"
@@ -327,6 +428,8 @@ services:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     <<: *conf
+
+# **********************************************  自建网盘类 ***********************************************************
 # —————— alist  ————————
   alist:
     image: xhofe/alist
@@ -345,17 +448,6 @@ services:
       PUID: "0"
       PGID: "0"
       UMASK: "022"
-# ——————  公网利器lucky ————————
-  lucky:
-    image: gdy666/lucky
-    container_name: lucky
-    labels:
-      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:16601]"
-    volumes:
-      - /mnt/user/appdata/mydata/lucky:/goodluck
-    network_mode: host
-    restart: always
 
 # ——————— nascab —————————
   cab:
@@ -375,7 +467,7 @@ services:
       <<: *env
     logging:
       options:
-        max-size: "10m"
+        max-size: "10M"
         max-file: "3"
 
 # —————————————————  这一段是webos的相关配置  ——————————————————————
@@ -421,56 +513,24 @@ services:
     container_name: webosredis
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
-    ports:
-      - 6379:6379
     <<: *conf
     environment:
       <<: *env
-# ———————————————— aria2后端 ————————————————————————————————————————————————————————————————————————
-  aria2:
-    container_name: aria2
-    image: p3terx/aria2-pro
-    labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_B.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
-    ports:
-      - 6800:6800
-      - 6888:6888/tcp
-      - 6888:6888/udp              # 请在路由器映射6888的tcp和udp端口
-    environment:
-      <<: *env
-      RPC_SECRET: "password"       # WebUI 连接时需要填写的密码
-      RPC_PORT: "6800"             # RPC 端口设置
-      LISTEN_PORT: "6888"          # BT 监听端口（TCP）、DHT 监听端口（UDP）设置
-      DISK_CACHE: "64M"            # 磁盘缓存设置，默认值64M
-      IPV6_MODE: "false"           # IPv6 模式
-      UPDATE_TRACKERS: "true"      # 更新trakers
-      CUSTOM_TRACKER_URL: "https://cf.trackerslist.com/best.txt"          # trackers 列表
-    volumes:
-      - /mnt/user/appdata/mydata/aria2:/config
-      - /mnt/user/movie_data:/downloads
-    <<: *conf
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1M"
 
-# ———————————————— aria2前端 ————————————————————————————————————————————————————————————————————————
-  ariang:
-    container_name: ariang
-    image: p3terx/ariang
+
+# **********************************************  一般工具类 ***********************************************************
+
+# ——————  公网利器lucky ————————
+  lucky:
+    image: gdy666/lucky
+    container_name: lucky
     labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Aria2_A.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:6880]"
-    ports:
-      - 6880:6880
-    <<: *conf
-    environment:
-      <<: *env
-    logging:
-      driver: json-file
-      options:
-        max-size: 1m
+      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:16601]"
+    volumes:
+      - /mnt/user/appdata/mydata/lucky:/goodluck
+    network_mode: host
+    restart: always
 
 # ——— 签到 ————
   qd:
@@ -488,40 +548,6 @@ services:
       PROXIES: "v2:20172"   # 代理地址
     <<: *conf
 
-# ——————————————————————————————————————————————————————————————————————————————————————————————————————————————
-# 本项目需要搭配浏览器插件 并且在浏览器插件里填写相应的 ip 端口 以及有公网访问需求的话建议在配置文件里开启并加上token
-  kubespider:
-    image: cesign/kubespider
-    container_name: kubespider
-    labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Kubespider_A.png"
-      com.centurylinklabs.watchtower.enable: "true"
-    depends_on:
-      - qb             
-      - aria2
-    environment:
-      <<: *env
-    ports:
-      - 3080:3080
-    volumes:
-      - /mnt/user/appdata/mydata/kubespider:/app/.config         # 去路径下 更改配置文件
-    <<: *conf
-
-# ————————  备忘录  ————————
-  memos:
-    image: neosmemo/memos
-    container_name: memos
-    labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Memos_A.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:5230]"
-    volumes:
-      - /mnt/user/appdata/mydata/memos:/var/opt/memos
-    ports:
-      - 5230:5230
-    environment:
-      <<: *env 
-    <<: *conf
-
 # —————— syncthing同步 ————————
   syncthing:
     image: syncthing/syncthing
@@ -533,7 +559,56 @@ services:
       <<: *env
     volumes:
       - /mnt/user/appdata/mydata/sync:/var/syncthing 
-    network_mode: "host"
+    network_mode: host
+
+# —————— 青龙 ——————————
+  ql:
+    image: whyour/qinglong
+    container_name: qinglong
+    labels:
+      net.unraid.docker.icon: "https://user-images.githubusercontent.com/22700758/191449379-f9f56204-0e31-4a16-be5a-331f52696a73.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:5700]"
+      com.centurylinklabs.watchtower.enable: "true"
+    volumes:
+      - /mnt/user/appdata/mydata/qinglong:/ql/data
+    ports:
+      - 5700:5700
+    environment:
+      <<: *env
+    <<: *conf
+
+# ————————  vaultwarden密码  ——————————
+  vaultwarden:
+    image: vaultwarden/server
+    container_name: vaultwarden
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Bitwarden_A.png"
+      net.unraid.docker.webui: ""  # 你的反向代理域名地址
+    volumes:
+      - /mnt/user/appdata/mydata/vaultwarden:/data
+    ports:
+      - 83:80
+    environment:
+      <<: *env
+      #SIGNUPS_ALLOWED: "false"    # 去掉前面的#号 就是禁止注册了，建议注册好自己的主用户后再打开这个选项
+    <<: *conf
+
+
+# ———————— heimdall导航 ——————————————   弃用 打开速度太慢了
+# css 文件 请参考 https://github.com/leesonaa/unraid-docker-compose 里heimdall css文件
+#  heimdall:
+#    image: linuxserver/heimdall
+#    container_name: heimdall
+#    labels:
+#      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Heimdall_B.png"
+#      net.unraid.docker.webui: "http://[IP]:[PORT:82]"
+#    environment:
+#      <<: *env
+#    volumes:
+#      - /mnt/user/appdata/mydata/heimdall:/config
+#    ports:
+#      - 82:80
+#    <<: *conf
 
 # ———————— sun-panel导航面板 —————————————— user: admin@sun.cc  passwd: 12345678
   sun-panel:
@@ -553,39 +628,111 @@ services:
       <<: *env
     <<: *conf
 
-# —————— 青龙 ——————————
-  ql:
-    image: whyour/qinglong
-    container_name: qinglong
+# ——————————————————————————————————————————————————————————————————————————————————————————
+#  excalidraw:
+#    image: excalidraw/excalidraw
+#    container_name: excalidraw
+#    labels:
+#      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Excalidraw_B.png"
+#      net.unraid.docker.webui: "http://[IP]:[PORT:85]"
+#    ports:
+#      - "85:80"
+#    environment:
+#      <<: *env
+#    <<: *conf
+
+#———————  excalidraw可协作的绘画板  —————————————— 
+#  ❗❗❗ 注意事项：
+#  ❗❗❗ 前端需要反代才能访问 
+#  ❗❗❗ 你需要做3个反向代理分别指向 前端端口86  协助服务器端口85  后端存储端口87
+#  ❗❗❗  主页面就是你的前端的外网域名地址  做一个指向86端口的前端域名地址即可访问
+  excalidraw:   # excalidraw 前端  需要反代才能访问  
+    image: alswl/excalidraw:v0.17.0-fork-b2
+    container_name: dw-excalidraw
     labels:
-      net.unraid.docker.icon: "https://user-images.githubusercontent.com/22700758/191449379-f9f56204-0e31-4a16-be5a-331f52696a73.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:5700]"
-      com.centurylinklabs.watchtower.enable: "true"
-    volumes:
-      - /mnt/user/appdata/mydata/qinglong:/ql/data
-    ports:
-      - 5700:5700
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Excalidraw_B.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:86]"  # 这段其实没啥作用 因为http访问不了 必须使用https
     environment:
-      <<: *env
+      - VITE_APP_BACKEND_V2_GET_URL=https://houduancunchu.baidu.com:1234/api/v2/       # 存储后端的域名地址   这里用houduanchunchu.baidu.com:1234 举的例  
+      - VITE_APP_BACKEND_V2_POST_URL=https://houduancunchu.baidu.com:1234/api/v2/post/  # 存储后端的域名地址  这里用houduanchunchu.baidu.com:1234 举的例
+      - VITE_APP_WS_SERVER_URL=https://xiezhufuwuqi.baidu.com:1234     # 协助服务器的域名地址     这里用 xiezhufuwuqi.baidu.com:1234  举例
+      - VITE_APP_FIREBASE_CONFIG={}
+      # alswl'fork env
+      # forked excalidraw can use env https://github.com/alswl/excalidraw/pull/5
+      - VITE_APP_HTTP_STORAGE_BACKEND_URL=https://houduancunchu.baidu.com:1234/api/v2     # 存储后端的域名地址   这里用houduanchunchu.baidu.com:1234 举的例
+      - VITE_APP_STORAGE_BACKEND=https
+    ports:
+      - 86:80
+    <<: *conf
+# 需要反向代理
+  storage:     # excalidraw存储后端
+    image: alswl/excalidraw-storage-backend:v2023.11.11
+    container_name: dw-storage
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Excalidraw_B.png"
+    environment: # docs https://github.com/alswl/excalidraw-storage-backend#environement-variables
+      PORT: "8081"                  #PORT 服务器监听端口 默认8081  这里要和下面容器内端口一样
+      GLOBAL_PREFIX: "/api/v2"            #GLOBAL_PREFIX 每个路由的 API 全局前缀  /api/v2
+      STORAGE_URI: "redis://dwredis:6379"               #STORAGE_URI Keyv连接字符串，例如：redis://pass@ip:port. 可用的 Keyv 存储适配器：redis、mongo、postgres 和 mysql  ""（在内存中非持久）
+      LOG_LEVEL: "log"              #LOG_LEVEL 日志级别 ( debug, verbose, log, warn, error)  默认 warn
+      BODY_LIMIT: "50mb"               #BODY_LIMIT  场景或图像的有效负载大小限制  默认50mb
+    depends_on: 
+      - dwredis
+    ports:
+      - 87:8081
     <<: *conf
 
-# ————————  vaultwarden  ——————————
-  vaultwarden:
-    image: vaultwarden/server
-    container_name: vaultwarden
+  dwredis:    # excalidraw缓存
+    image: redis
+    container_name: dw-redis
     labels:
-      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Bitwarden_A.png"
-      net.unraid.docker.webui: ""  # 你的反向代理域名地址
-    volumes:
-      - /mnt/user/appdata/mydata/vaultwarden:/data
-    ports:
-      - 83:80
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
+    <<: *conf
     environment:
-      <<: *env
-      #SIGNUPS_ALLOWED: "false"    # 去掉前面的#号 就是禁止注册了，建议注册好自己的主用户后再打开这个选项
+      <<: *env      
+# 需要反向代理指向85端口
+  room:       # excalidraw协助服务器
+    image: excalidraw/excalidraw-room:sha-49bf529
+    container_name: dw-room
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Excalidraw_B.png"
+    ports:
+      - 85:80
     <<: *conf
 
-# —————————————————————————— joplin ————————————————————————————————————————————————————
+
+# **********************************************  笔记备忘录类 ***********************************************************
+# ————————  备忘录  ————————
+  memos:
+    image: neosmemo/memos
+    container_name: memos
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Memos_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:5230]"
+    volumes:
+      - /mnt/user/appdata/mydata/memos:/var/opt/memos
+    ports:
+      - 5230:5230
+    environment:
+      <<: *env 
+    <<: *conf
+# trilium 中文翻译版 推荐 有画板集成    
+  trilium-cn:   
+    image: leesonaa/trilium-cn
+    container_name: trilium-cn
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Trilium_A.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:88]"
+    ports:
+      - 88:8080
+    volumes:
+      - /mnt/user/appdata/mydata/trilium-cn:/root/trilium-data
+    environment:
+      <<: *env
+      #TRILIUM_DATA_DIR: "/root/trilium-data"   # 可选，自定义存储路径 注意 是容器内
+    <<: *conf
+
+# —————————— joplin ———————
   joplinpg:                                                   # joplin pg 数据库配置
     image: postgres
     container_name: joplinpg
@@ -616,7 +763,7 @@ services:
     environment:
       <<: *env
       APP_PORT: "22300"
-      APP_BASE_URL: "http://192.168.100.2:22300"       # 内网用就内网地址 外网用就外网地址
+      APP_BASE_URL: "http://192.168.100.2:22300"        # 内网用也得做各一个反向代理 https访问，外网访问的话，需要反向代理后的外部访问域名 写在这里
       DB_CLIENT: "pg"
       POSTGRES_PASSWORD: "joplin"
       POSTGRES_DATABASE: "joplin"
@@ -624,11 +771,8 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_HOST: "joplinpg"
 
-# ——————————————————————————————————————————————————————————————————————————————————————————
 
-
-
-# 自定义网卡 驱动为桥接  
+# 自定义网卡 驱动为桥接  这样的好处就是 比如我有10个redis缓存服务 只对容器服务 就是让容器去调用它 我自己也没有访问它的需求 不需要做-p端口映射的操作 那么我只需要用主机名+默认端口的方式去访问就可以 因为在内部它是一个容器一个私有ip地址的 
 networks:
   mynet:
     name: mnet
