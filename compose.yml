@@ -112,7 +112,7 @@ services:
       - "8096:8096"
     volumes:
       - ${DATA-PATH}/jellyfin:/config      # 配置文件路径
-      - /mnt/user/movie_data:/moviedata              # 媒体文件路径
+      - ${MOVIE-DATA}:/moviedata              # 媒体文件路径
       - /dev/shm/jf:/cache                           # 缓存进内存
     <<: *conf
     environment:
@@ -132,7 +132,7 @@ services:
       - 8097:8096
     volumes:
       - ${DATA-PATH}/emby:/config       # 配置文件路径
-      - /mnt/user/movie_data:/moviedata                 # 媒体文件路径
+      - ${MOVIE-DATA}:/moviedata                 # 媒体文件路径
       #- /dev/shm/emby:/dev/shm/emby                           # emby这条没用
     <<: *conf
     environment:
@@ -160,7 +160,7 @@ services:
       <<: *env
     volumes:
       - ${DATA-PATH}/plex:/config
-      - /mnt/user/movie_data:/moviedata
+      - ${MOVIE-DATA}:/moviedata
     <<: *conf
     privileged: "true"
     devices:
@@ -192,7 +192,7 @@ services:
       - 3001:3000
     volumes:
       - ${DATA-PATH}/nastools:/config          # 配置路径
-      - /mnt/user/movie_data:/movie_data                   # 媒体文件和下载目录的公共的上层路径
+      - ${MOVIE-DATA}:/movie_data                   # 媒体文件和下载目录的公共的上层路径
     <<: *conf
     environment:
       <<: *env
@@ -206,7 +206,7 @@ services:
       net.unraid.docker.webui: "http://[IP]:[PORT:3002]"
     volumes:
       - ${DATA-PATH}/moviepilot:/config
-      - /mnt/user/movie_data:/movie_data   # 要和下载器配置一致
+      - ${MOVIE-DATA}:/movie_data   # 要和下载器配置一致
     ports:
       - 3002:3000
     env_file:
@@ -227,7 +227,7 @@ services:
       # RUN_OPTS:  #optional
     volumes:
       - ${DATA-PATH}/jackett:/config
-      - /mnt/user/movie_data:/downloads
+      - ${MOVIE-DATA}:/downloads
     ports:
       - 9117:9117
     
@@ -240,7 +240,7 @@ services:
       net.unraid.docker.webui: "http://[IP]:[PORT:19035]"
     volumes:
       - ${DATA-PATH}/chinesesubfinder:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
-      - /mnt/user/movie_data:/media    # 请修改为你的媒体目录，冒号右边必须是/media  否则报权限错
+      - ${MOVIE-DATA}:/media    # 请修改为你的媒体目录，冒号右边必须是/media  否则报权限错
     <<: *conf
     environment:
       <<: *env
@@ -295,7 +295,7 @@ services:
       - 6881:6881/udp
     volumes:
       - ${DATA-PATH}/qbittorrent:/config             # 配置路径
-      - /mnt/user/movie_data:/Downloads                     # 下载路径
+      - ${MOVIE-DATA}:/Downloads                     # 下载路径
     <<: *conf
     environment:
       UID: "99"
@@ -323,7 +323,7 @@ services:
 
     volumes:
       - ${DATA-PATH}/transmission:/config               # 配置路径
-      - /mnt/user/movie_data:/downloads                       # 下载路径
+      - ${MOVIE-DATA}:/downloads                       # 下载路径
       # - /path/to/watch/folder:/watch
     ports:
       - 9091:9091
@@ -352,7 +352,7 @@ services:
       CUSTOM_TRACKER_URL: "https://cf.trackerslist.com/best.txt"          # trackers 列表
     volumes:
       - ${DATA-PATH}/aria2:/config
-      - /mnt/user/movie_data:/downloads
+      - ${MOVIE-DATA}:/downloads
     <<: *conf
     logging:
       driver: "json-file"
@@ -441,7 +441,7 @@ services:
       - 5244:5244
     volumes:
       - ${DATA-PATH}/alist:/opt/alist/data
-    # - /mnt/user/movie_data:/mydata            # 这里写自己要共享的路径映射
+    # - ${MOVIE-DATA}:/mydata            # 这里写自己要共享的路径映射
     <<: *conf
     environment:
       <<: *env
