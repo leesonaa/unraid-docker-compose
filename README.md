@@ -14,4 +14,4 @@ docker compose /path/compose.yml up -d
 rm -rf /var/lib/docker/unraid/images/* && rm -rf /var/local/emhttp/plugins/dynamix.docker.manager/images/* 
 ```
 - 3.关于 .env 里媒体文件的说明如下图
-  ![2023-12-14-1809](https://github.com/leesonaa/unraid-docker-compose/assets/97571961/0f7aa9ec-5684-4163-9010-53cceef4aa84)
+![2023-12-14-1832](https://github.com/leesonaa/unraid-docker-compose/assets/97571961/e7390d58-8ae9-40ea-8562-f1bb2eb01f8d)
