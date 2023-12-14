@@ -73,7 +73,7 @@ services:
     environment:
       <<: *env
     volumes:
-      - /mnt/user/appdata/mydata/snapdrop:/config
+      - ${DATA-PATH}/snapdrop:/config
     ports:
       - 84:80
     <<: *conf
@@ -111,7 +111,7 @@ services:
     ports: 
       - "8096:8096"
     volumes:
-      - /mnt/user/appdata/mydata/jellyfin:/config      # 配置文件路径
+      - ${DATA-PATH}/jellyfin:/config      # 配置文件路径
       - /mnt/user/movie_data:/moviedata              # 媒体文件路径
       - /dev/shm/jf:/cache                           # 缓存进内存
     <<: *conf
@@ -131,7 +131,7 @@ services:
     ports:
       - 8097:8096
     volumes:
-      - /mnt/user/appdata/mydata/emby:/config       # 配置文件路径
+      - ${DATA-PATH}/emby:/config       # 配置文件路径
       - /mnt/user/movie_data:/moviedata                 # 媒体文件路径
       #- /dev/shm/emby:/dev/shm/emby                           # emby这条没用
     <<: *conf
@@ -159,7 +159,7 @@ services:
     environment:
       <<: *env
     volumes:
-      - /mnt/user/appdata/mydata/plex:/config
+      - ${DATA-PATH}/plex:/config
       - /mnt/user/movie_data:/moviedata
     <<: *conf
     privileged: "true"
@@ -173,9 +173,9 @@ services:
       net.unraid.docker.icon: "https://iyuu.cn/usr/uploads/logo/logo_257.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:8787]"
     volumes:
-      - /mnt/user/appdata/mydata/iyuu:/IYUU/db
-      #- /mnt/user/appdata/mydata/qbittorrent/qBittorrent/data/BT_backup:/BT_backup  #冒号左边请修改为你自己的路径，如不使用qb，可删除本行
-      #- /mnt/user/appdata/mydata/transmission/torrents:/torrents   #冒号左边请修改为你自己的路径，如不使用tr，可删除本行
+      - ${DATA-PATH}/iyuu:/IYUU/db
+      #- ${DATA-PATH}/qbittorrent/qBittorrent/data/BT_backup:/BT_backup  #冒号左边请修改为你自己的路径，如不使用qb，可删除本行
+      #- ${DATA-PATH}/transmission/torrents:/torrents   #冒号左边请修改为你自己的路径，如不使用tr，可删除本行
     ports:
       - 8787:8787
     environment:
@@ -191,7 +191,7 @@ services:
     ports:
       - 3001:3000
     volumes:
-      - /mnt/user/appdata/mydata/nastools:/config          # 配置路径
+      - ${DATA-PATH}/nastools:/config          # 配置路径
       - /mnt/user/movie_data:/movie_data                   # 媒体文件和下载目录的公共的上层路径
     <<: *conf
     environment:
@@ -205,7 +205,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Moviepilot_A.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:3002]"
     volumes:
-      - /mnt/user/appdata/mydata/moviepilot:/config
+      - ${DATA-PATH}/moviepilot:/config
       - /mnt/user/movie_data:/movie_data   # 要和下载器配置一致
     ports:
       - 3002:3000
@@ -226,7 +226,7 @@ services:
       AUTO_UPDATE: "true" #optional
       # RUN_OPTS:  #optional
     volumes:
-      - /mnt/user/appdata/mydata/jackett:/config
+      - ${DATA-PATH}/jackett:/config
       - /mnt/user/movie_data:/downloads
     ports:
       - 9117:9117
@@ -239,7 +239,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Chinesesubfinder_A.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:19035]"
     volumes:
-      - /mnt/user/appdata/mydata/chinesesubfinder:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
+      - ${DATA-PATH}/chinesesubfinder:/config  # 冒号左边请修改为你想在主机上保存配置、日志等文件的路径
       - /mnt/user/movie_data:/media    # 请修改为你的媒体目录，冒号右边必须是/media  否则报权限错
     <<: *conf
     environment:
@@ -258,7 +258,7 @@ services:
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Cookiecloud_A.png"
     volumes:
-      - /mnt/user/appdata/mydata/cookiecloud:/data/api/data
+      - ${DATA-PATH}/cookiecloud:/data/api/data
     ports:
       - 8088:8088
     <<: *conf
@@ -280,7 +280,7 @@ services:
     ports:
       - 3080:3080
     volumes:
-      - /mnt/user/appdata/mydata/kubespider:/app/.config         # 去路径下 更改配置文件
+      - ${DATA-PATH}/kubespider:/app/.config         # 去路径下 更改配置文件
     <<: *conf
 # **********************************************  下载器类 ***********************************************************
   qb:                                 # qb启动完成看日志  有随机密码  
@@ -294,7 +294,7 @@ services:
       - 6881:6881/tcp
       - 6881:6881/udp
     volumes:
-      - /mnt/user/appdata/mydata/qbittorrent:/config             # 配置路径
+      - ${DATA-PATH}/qbittorrent:/config             # 配置路径
       - /mnt/user/movie_data:/Downloads                     # 下载路径
     <<: *conf
     environment:
@@ -314,7 +314,7 @@ services:
     <<: *conf
     environment:
       <<: *env
-      TRANSMISSION_WEB_HOME: /config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进/mnt/user/appdata/mydata/tr/目录下刷新
+      TRANSMISSION_WEB_HOME: /config/src/ #optional          # webui下载地址 https://github.com/ronggang/transmission-web-control  把src目录解压出来丢进${DATA-PATH}/tr/目录下刷新
       USER:                                                 # 登录账户
       PASS:                                                 # 登录密码
       WHITELIST:  #optional
@@ -322,7 +322,7 @@ services:
       HOST_WHITELIST:  #optional
 
     volumes:
-      - /mnt/user/appdata/mydata/transmission:/config               # 配置路径
+      - ${DATA-PATH}/transmission:/config               # 配置路径
       - /mnt/user/movie_data:/downloads                       # 下载路径
       # - /path/to/watch/folder:/watch
     ports:
@@ -351,7 +351,7 @@ services:
       UPDATE_TRACKERS: "true"      # 更新trakers
       CUSTOM_TRACKER_URL: "https://cf.trackerslist.com/best.txt"          # trackers 列表
     volumes:
-      - /mnt/user/appdata/mydata/aria2:/config
+      - ${DATA-PATH}/aria2:/config
       - /mnt/user/movie_data:/downloads
     <<: *conf
     logging:
@@ -395,7 +395,7 @@ services:
       V2RAYA_LOG_FILE: "/tmp/v2raya.log"
       V2RAYA_V2RAY_BIN: "/usr/local/bin/v2ray"      # 这行注释掉就会默认使用xray-core
     volumes:
-      - /mnt/user/appdata/mydata/v2raya:/etc/v2raya
+      - ${DATA-PATH}/v2raya:/etc/v2raya
       - /lib/modules:/lib/modules:ro
       - /etc/resolv.conf:/etc/resolv.conf
 
@@ -407,7 +407,7 @@ services:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/WireGuardEasy/icon.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:51821]"
     volumes:
-      -  /mnt/user/appdata/mydata/wg:/etc/wireguard
+      -  ${DATA-PATH}/wg:/etc/wireguard
     environment:
       WG_HOST: "you.domain.com"                           #❗❗❗ 你的域名地址 不要加协议头
       PASSWORD: "123456"                                      #web端登录密码
@@ -440,7 +440,7 @@ services:
     ports:
       - 5244:5244
     volumes:
-      - /mnt/user/appdata/mydata/alist:/opt/alist/data
+      - ${DATA-PATH}/alist:/opt/alist/data
     # - /mnt/user/movie_data:/mydata            # 这里写自己要共享的路径映射
     <<: *conf
     environment:
@@ -460,7 +460,7 @@ services:
       - 81:80  # http port
       - 90:90  # webdav port
     volumes:
-      - /mnt/user/appdata/mydata/nascab:/root/.local/share/nascab
+      - ${DATA-PATH}/nascab:/root/.local/share/nascab
      #- /mnt/user/appdata/photo:/mydata           # 映射自己的数据 比如影音 照片等等
     <<: *conf
     environment:
@@ -480,9 +480,9 @@ services:
     ports:
       - 8087:8088
     volumes:
-      - /mnt/user/appdata/mydata/webos/config:/webos/api/rootPath   # 配置持久化
-      - /mnt/user/appdata/mydata/webos/apps:/webos/web/apps         # 插件app持久化
-    # - /mnt/user/appdata/mydata:/mydata       # 挂载宿主
+      - ${DATA-PATH}/webos/config:/webos/api/rootPath   # 配置持久化
+      - ${DATA-PATH}/webos/apps:/webos/web/apps         # 插件app持久化
+    # - ${DATA-PATH}:/mydata       # 挂载宿主
     <<: *conf
     environment:
       <<: *env
@@ -498,7 +498,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /mnt/user/appdata/mydata/webosdb:/var/lib/mysql          # 数据库文件路径
+      - ${DATA-PATH}/webosdb:/var/lib/mysql          # 数据库文件路径
     environment:
       <<: *env
       MYSQL_ROOT_PASSWORD: "webos"                  # 数据库root密码
@@ -528,7 +528,7 @@ services:
       net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Lucky/icon.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:16601]"
     volumes:
-      - /mnt/user/appdata/mydata/lucky:/goodluck
+      - ${DATA-PATH}/lucky:/goodluck
     network_mode: host
     restart: always
 
@@ -542,7 +542,7 @@ services:
     ports:
       - 8923:80
     volumes:
-      - /mnt/user/appdata/mydata/qiandao:/usr/src/app/config
+      - ${DATA-PATH}/qiandao:/usr/src/app/config
     environment:
       <<: *env
       PROXIES: "v2:20172"   # 代理地址
@@ -558,7 +558,7 @@ services:
     environment:
       <<: *env
     volumes:
-      - /mnt/user/appdata/mydata/sync:/var/syncthing 
+      - ${DATA-PATH}/sync:/var/syncthing 
     network_mode: host
 
 # —————— 青龙 ——————————
@@ -570,7 +570,7 @@ services:
       net.unraid.docker.webui: "http://[IP]:[PORT:5700]"
       com.centurylinklabs.watchtower.enable: "true"
     volumes:
-      - /mnt/user/appdata/mydata/qinglong:/ql/data
+      - ${DATA-PATH}/qinglong:/ql/data
     ports:
       - 5700:5700
     environment:
@@ -585,7 +585,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Bitwarden_A.png"
       net.unraid.docker.webui: ""  # 你的反向代理域名地址
     volumes:
-      - /mnt/user/appdata/mydata/vaultwarden:/data
+      - ${DATA-PATH}/vaultwarden:/data
     ports:
       - 83:80
     environment:
@@ -605,7 +605,7 @@ services:
 #    environment:
 #      <<: *env
 #    volumes:
-#      - /mnt/user/appdata/mydata/heimdall:/config
+#      - ${DATA-PATH}/heimdall:/config
 #    ports:
 #      - 82:80
 #    <<: *conf
@@ -618,9 +618,9 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hslr-s/sun-panel/master/doc/images/logo.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:3003]"
     volumes:
-    - /mnt/user/appdata/mydata/sun-panel/conf:/app/conf
-    - /mnt/user/appdata/mydata/sun-panel/uploads:/app/uploads
-    - /mnt/user/appdata/mydata/sun-panel/database:/app/database
+    - ${DATA-PATH}/sun-panel/conf:/app/conf
+    - ${DATA-PATH}/sun-panel/uploads:/app/uploads
+    - ${DATA-PATH}/sun-panel/database:/app/database
     # - ./runtime:/app/runtime   # 日志文件
     ports:
     - 3003:3002
@@ -710,7 +710,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Memos_A.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:5230]"
     volumes:
-      - /mnt/user/appdata/mydata/memos:/var/opt/memos
+      - ${DATA-PATH}/memos:/var/opt/memos
     ports:
       - 5230:5230
     environment:
@@ -726,7 +726,7 @@ services:
     ports:
       - 88:8080
     volumes:
-      - /mnt/user/appdata/mydata/trilium-cn:/root/trilium-data
+      - ${DATA-PATH}/trilium-cn:/root/trilium-data
     environment:
       <<: *env
       #TRILIUM_DATA_DIR: "/root/trilium-data"   # 可选，自定义存储路径 注意 是容器内
@@ -739,7 +739,7 @@ services:
     labels:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Postgresql_B.png"
     volumes:
-      - /mnt/user/appdata/mydata/joplinpostgres:/var/lib/postgresql/data
+      - ${DATA-PATH}/joplinpostgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
     <<: *conf 
