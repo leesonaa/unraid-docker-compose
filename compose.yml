@@ -646,6 +646,7 @@ services:
 #  ❗❗❗ 前端需要反代才能访问 
 #  ❗❗❗ 你需要做3个反向代理分别指向 前端端口86  协助服务器端口85  后端存储端口8081
 #  ❗❗❗  主页面就是你的前端的外网域名地址  做一个指向86端口的前端域名地址即可访问
+#  ❗❗❗ ❗❗❗ ❗❗❗  我是用的lucky做的反向代理  打开 1.使用目标host  2.打开跨域支持
   excalidraw:   # excalidraw 前端  需要反代才能访问  
     image: alswl/excalidraw:v0.17.0-fork-b2
     container_name: dw-excalidraw
@@ -653,17 +654,20 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Excalidraw_B.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:86]"  # 这段其实没啥作用 因为http访问不了 必须使用https
     environment:
-      - VITE_APP_BACKEND_V2_GET_URL=https://houduancunchu.baidu.com:1234/api/v2/       # 存储后端的域名地址   这里用houduanchunchu.baidu.com:1234 举的例  
-      - VITE_APP_BACKEND_V2_POST_URL=https://houduancunchu.baidu.com:1234/api/v2/post/  # 存储后端的域名地址  这里用houduanchunchu.baidu.com:1234 举的例
+      - VITE_APP_BACKEND_V2_GET_URL=https://houduancunchu.baidu.com:1234/scenes/       # 存储后端的域名地址   这里用houduanchunchu.baidu.com:1234 举的例  
+      - VITE_APP_BACKEND_V2_POST_URL=https://houduancunchu.baidu.com:1234/scenes/  # 存储后端的域名地址  这里用houduanchunchu.baidu.com:1234 举的例
       - VITE_APP_WS_SERVER_URL=https://xiezhufuwuqi.baidu.com:1234     # 协助服务器的域名地址     这里用 xiezhufuwuqi.baidu.com:1234  举例
       - VITE_APP_FIREBASE_CONFIG={}
       # alswl'fork env
       # forked excalidraw can use env https://github.com/alswl/excalidraw/pull/5
       - VITE_APP_HTTP_STORAGE_BACKEND_URL=https://houduancunchu.baidu.com:1234/api/v2     # 存储后端的域名地址   这里用houduanchunchu.baidu.com:1234 举的例
-      - VITE_APP_STORAGE_BACKEND=https
+      - VITE_APP_STORAGE_BACKEND=http
     ports:
       - 86:80
     <<: *conf
+    depends_on:
+      - room
+      - storage
 # 需要反向代理
   storage:     # excalidraw存储后端
     image: alswl/excalidraw-storage-backend:v2023.11.11
