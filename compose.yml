@@ -81,7 +81,7 @@ services:
 #  rclone:                                # 挂载是没问题就是重启后挂载失败 原因是重启前没有unmount
 #    image: d2dyno/rclone-gui
 #    container_name: rclone
-#    privileged: "true" 
+#    privileged: true 
 #    environment:
 #      TZ: "Asia/Shanghai"
 #      USER_ID: "0"
@@ -117,7 +117,7 @@ services:
     <<: *conf
     environment:
       <<: *env
-    privileged: "true"                               # 特权模式
+    privileged: true                               # 特权模式
     devices:
       - "/dev:/dev"
 
@@ -137,7 +137,7 @@ services:
     <<: *conf
     environment:
       <<: *env
-    privileged: "true"
+    privileged: true
     devices:
       - "/dev:/dev"
   
@@ -162,7 +162,7 @@ services:
       - ${DATA-PATH}/plex:/config
       - ${MOVIE-DATA}:/moviedata
     <<: *conf
-    privileged: "true"
+    privileged: true
     devices:
       - "/dev:/dev"
 # ********************************************** PT & BT 相关应用 ***********************************************************
@@ -385,7 +385,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/V2raya_A.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:2017]"
       com.centurylinklabs.watchtower.enable: "true"         # 设置watchtower 监控更新标签
-    privileged: "true"
+    privileged: true
     ports:
       - 2017:2017
       - 20170-20172:20170-20172
