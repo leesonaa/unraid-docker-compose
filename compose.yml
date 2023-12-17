@@ -39,7 +39,7 @@ services:
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Postgresql_B.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:8082]"
     environment:
-      <<: *env
+      TZ: Asia/Shanghai
       PGADMIN_DEFAULT_EMAIL: admin@admin.com    # 邮箱
       PGADMIN_DEFAULT_PASSWORD: password           # 用户密码
     user: root
