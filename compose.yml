@@ -32,6 +32,22 @@ services:
 #          6. transmission 下面有下载webui的界面地址和说明 
 #
 # **********************************************  数据库管理 && 工具 *********************************************************** 
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Postgresql_B.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:8082]"
+    environment:
+      <<: *env
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com    # 邮箱
+      PGADMIN_DEFAULT_PASSWORD: password           # 用户密码
+      PGADMIN_LISTEN_ADDRESS: 0.0.0.0
+    ports:
+      - "8082:80"
+    volumes:
+      - ${MYPATH}/pgadmin/data:/var/lib/pgadmin
+    <<: *conf
 
   adminer:
     image: adminer
@@ -774,7 +790,106 @@ services:
       POSTGRES_USER: "joplin"
       POSTGRES_PORT: "5432"
       POSTGRES_HOST: "joplinpg"
+# --------- immich相册 --------------------------------------------------------------------------------------------------------------------------------------------------
+  immich-server:                              # 前端服务
+    container_name: immich
+    #image: ghcr.io/immich-app/immich-server:release
+    image: altran1502/immich-server:release
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Immich_B.png"
+      net.unraid.docker.webui: "http://[IP]:[PORT:2283]"
+    command: [ "start.sh", "immich" ]
+    volumes:
+      - ${MYPATH}/immich/uploads:/usr/src/app/uploads  # 上传位置
+      - ${MYPATH}/immich/config:/config         #配置路径
+      - ${MYPATH}/immich/photo:/photos          # 相册
+      - /etc/localtime:/etc/localtime:ro         #读系统时间
+    environment:
+      <<: *env
+      DB_URL: "postgresql://postgres:immich@immich_postgres:5432/immich"
+      REDIS_URL: "ewogICJob3N0IjogImltbWljaF9yZWRpcyIsCiAgInBvcnQiOiA2Mzc5LAogICJkYiI6IDAKfQo="
+    ports:
+      - 2283:3001
+    depends_on:
+      - immich_redis
+      - immich_postgres
+    <<: *conf
 
+  immich-microservices:                   #转码服务  和主服务一模一样  就是启动command 不一样
+    container_name: immich-microservices
+    image: altran1502/immich-server:release
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Immich_A.png"
+    # extends:
+    #   file: hwaccel.yml
+    #   service: hwaccel
+    command: [ "start.sh", "microservices" ]
+    volumes:
+      - ${MYPATH}/immich/uploads:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      <<: *env
+      MICROSERVICES_PORT: "3002"
+      DB_URL: "postgresql://postgres:immich@immich_postgres:5432/immich"
+      REDIS_URL: "ewogICJob3N0IjogImltbWljaF9yZWRpcyIsCiAgInBvcnQiOiA2Mzc5LAogICJkYiI6IDAKfQo="   
+      # 上面这个是base64编码   对应的是 ioredis://immich_redis:6379/0  字符串连接redis缓存格式
+      # {
+      #      "host": "immich_redis",
+      #        "port": 6379,
+      #        "db": 0
+      #  }
+      #
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - 3004:3002
+    depends_on:
+      - immich_redis
+      - immich_postgres
+    <<: *conf
+
+  immich-machine-learning:                        #机器学习？？？？
+    container_name: immich_machine-learning
+    #image: ghcr.io/immich-app/immich-machine-learning:release
+    image: altran1502/immich-machine-learning:release
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Immich_A.png"
+    volumes:
+      - ${MYPATH}/immich/model-cache:/cache      # 模型缓存
+    environment:
+      <<: *env
+      MACHINE_LEARNING_PORT: "3003"
+    ports:
+      - 3005:3003
+    <<: *conf
+
+  immich_redis:                               # 缓存服务
+    container_name: immich_redis
+    image: redis
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Redis_A.png"
+    expose: 
+      - "6379"
+    environment:
+      <<: *env
+    <<: *conf
+
+  immich_postgres:                                # 数据库
+    container_name: immich-postgres
+    image: tensorchord/pgvecto-rs:pg14-v0.1.11
+    labels:
+      net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Postgresql_B.png"
+    environment:
+      <<: *env
+      POSTGRES_PASSWORD: "immich"       # 建议别动这3个环境变量
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "immich"
+    ports:
+      - 5433:5432
+    volumes:
+      - ${MYPATH}/immich/pgdata:/var/lib/postgresql/data
+    <<: *conf
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # 自定义网卡 驱动为桥接  这样的好处就是 比如我有10个redis缓存服务 只对容器服务 就是让容器去调用它 我自己也没有访问它的需求 不需要做-p端口映射的操作 那么我只需要用主机名+默认端口的方式去访问就可以 因为在内部它是一个容器一个私有ip地址的 
 networks:
