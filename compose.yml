@@ -42,7 +42,7 @@ services:
       <<: *env
       PGADMIN_DEFAULT_EMAIL: admin@admin.com    # 邮箱
       PGADMIN_DEFAULT_PASSWORD: password           # 用户密码
-      PGADMIN_LISTEN_ADDRESS: 0.0.0.0
+    user: root
     ports:
       - "8082:80"
     volumes:
