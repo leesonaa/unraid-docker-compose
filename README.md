@@ -10,8 +10,8 @@
 - 2.插件运行 Compose Manager直接编辑再compose up
 
   - unraid重建图标缓存命令，其他系统无视即可
-```bash
-rm -rf /var/lib/docker/unraid/images/* && rm -rf /var/local/emhttp/plugins/dynamix.docker.manager/images/* 
-```
+  ```bash
+  rm -rf /var/lib/docker/unraid/images/* && rm -rf /var/local/emhttp/plugins/dynamix.docker.manager/images/* 
+  ```
 - 3.关于 .env 里媒体文件的说明如下图
 ![2023-12-14-1832](https://github.com/leesonaa/unraid-docker-compose/assets/97571961/e7390d58-8ae9-40ea-8562-f1bb2eb01f8d)
