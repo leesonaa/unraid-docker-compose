@@ -4,9 +4,9 @@
 ***✔app.env为moviepilot的环境变量引用文件，用的到就留着，用不到就不留，非必要***
 - 1.运行命令
   - 下载这个库的几个文件到你的设备上，用户家目录或者root家目录都可以
-```bash
-docker compose /path/compose.yml up -d
-```
+  ```bash
+  docker compose /path/compose.yml up -d
+  ```
 - 2.插件运行 Compose Manager直接编辑再compose up
 
   - unraid重建图标缓存命令，其他系统无视即可
