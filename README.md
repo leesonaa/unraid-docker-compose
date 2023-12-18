@@ -1,4 +1,4 @@
-# 标题为unraid-docker-compose 实际任意docker环境下都可以用
+# 任意docker环境下都可以用
 ### 食用说明
 ***✔.env为compose.yml默认的环境变量文件，必要*** \
 ***✔app.env为moviepilot的环境变量引用文件，用的到就留着，用不到就不留，非必要***
