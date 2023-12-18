@@ -813,8 +813,12 @@ services:
       #REDIS_PASSWORD= #optional
       MACHINE_LEARNING_WORKERS: "1" #optional   打开机器学习 老旧设备如果效果不好请关闭 设置为 0
       MACHINE_LEARNING_WORKER_TIMEOUT: "120" #optional    机器学习超时  120秒
+      #HTTP_PROXY: "http://v2:20172"          # 这2个是给容器传递科学环境的 环境变量 
+      #HTTPS_PROXY: "http://v2:20172"
     ports:
       - 2283:8080
+    devices:
+      - /dev/dri:/dev/dri                     # 调用宿主显卡intel qsv 或者 vaapi 人脸识别 转码 
     depends_on:
       - immich-redis
       - immich-postgres
