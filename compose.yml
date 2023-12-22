@@ -417,34 +417,34 @@ services:
 
 # —————— 超好用的wirguard ——————
   wg:
-    image: weejewel/wg-easy
+    image: leesonaa/wgcnv6-easy
     container_name: wg
-    labels:
-      net.unraid.docker.icon: "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/WireGuardEasy/icon.png"
-      net.unraid.docker.webui: "http://[IP]:[PORT:51821]"
-    volumes:
-      -  ${DATA-PATH}/wg:/etc/wireguard
     environment:
-      WG_HOST: "you.domain.com"                           #❗❗❗ 你的域名地址 不要加协议头
-      PASSWORD: "123456"                                      #web端登录密码
-      WG_DEFAULT_DNS: "223.5.5.5,223.6.6.6"
-      WG_MTU: "1420"
-      WG_PERSISTENT_KEEPALIVE: "25"
-      WG_PORT: "21820"                                       #自定义容器外端口
-      WG_DEFAULT_ADDRESS: "192.168.5.x"                      # wg内分配的ip段 最后一位必须是x 
-      # WG_ALLOWED_IPS: "0.0.0.0/24,192.168.31.0/24"         #默认0.0.0.0/24 允许互访ip段 
-      <<: *env
+      - WG_HOST=raspberrypi.local   # you.domain.com 你的域名地址 不要协议头 ⚠️ 
+      - PASSWORD=foobar123          # *必填 web登录密码  ⚠️ 
+      # - WG_PORT=51820               # 可选 如果是bridge的方式部署 这里写容器外的端口号，如果下面的ports那边映射的是11820：51820的话 这里就是11820了
+      # - WG_DEFAULT_ADDRESS_IPV4=10.8.0.x    # 可选 你的wg私网v4网段  最后一个必须是  x 
+      # - WG_DEFAULT_ADDRESS_IPV6=fd42:42:42::x   # 可选 你的wg v6私网网段 最后一个必须是 x 可以保持默认
+      # - WG_DEFAULT_DNS=223.5.5.5,119.29.29.29                 # 可选 默认是阿里云的v4&v6的公共dns地址
+      # - WG_MTU=1420                               # 可选 
+      # - WG_ALLOWED_IPS=192.168.15.0/24, 10.0.1.0/24     # 可选 默认是任何地址0.0.0.0/24 ::0/64
+    #privileged: true # for podman issues   # 一般不需要特权
+    volumes:
+      - ${DATA-PATH}/wg:/etc/wireguard
     ports:
-      - "21820:51820/udp"
+      - "51820:51820/udp"
       - "51821:51821/tcp"
+    restart: unless-stopped
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    sysctls:
-      - net.ipv4.ip_forward=1
+    sysctls:                                    # ⚠️ 从这里开始  如果是bridge模式 就必须带上这一段 ,v6的话 如果wan侧有v6 lan侧没有 用socat或者lucky 从主路由把入站的udp端口甩过来 
+      - net.ipv4.ip_forward=1                       # 如果是lan测也有v6,也就是宿主机有v6 建议直接host模式 sysctls这段注释掉
       - net.ipv4.conf.all.src_valid_mark=1
-    <<: *conf
-
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv6.conf.default.forwarding=1
+      - net.ipv6.conf.eth0.proxy_ndp=1
 # **********************************************  自建网盘类 ***********************************************************
 # —————— alist  ————————
   alist:
