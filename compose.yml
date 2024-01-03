@@ -848,7 +848,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - ${MYPATH}/immich-pgdata:/var/lib/postgresql/data
+      - ${DATA_PATH}/immich-pgdata:/var/lib/postgresql/data
     <<: *conf
 # ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
