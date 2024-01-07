@@ -420,6 +420,7 @@ services:
     image: leesonaa/wgcnv6-easy
     container_name: wg
     environment:
+      <<: *env
       - WG_HOST=raspberrypi.local   # you.domain.com 你的域名地址 不要协议头 ⚠️ 
       - PASSWORD=foobar123          # *必填 web登录密码  ⚠️ 
       # - WG_PORT=51820               # 可选 如果是bridge的方式部署 这里写容器外的端口号，如果下面的ports那边映射的是11820：51820的话 这里就是11820了
@@ -434,7 +435,7 @@ services:
     ports:
       - "51820:51820/udp"
       - "51821:51821/tcp"
-    restart: unless-stopped
+    <<: *conf
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
