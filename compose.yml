@@ -74,22 +74,21 @@ services:
     environment:
       TZ: "Asia/Shanghai"
       WATCHTOWER_POLL_INTERVAL: "43200"  # 轮询时间 单位 秒
-      #WATCHTOWER_LABEL_ENABLE: "true"   # 监视并更新com.centurylinklabs.watchtower.enable标签设置为 true 的容器
+      #WATCHTOWER_LABEL_ENABLE: "true"   # 监视并更新com.centurylinklabs.watchtower.enable标签设置为 true 的容器  见下面pairdrop 的 labels
       WATCHTOWER_CLEANUP: "true"         # 清理玄虚镜像
       WATCHTOWER_REMOVE_VOLUMES: "true"  # 删除匿名卷
       WATCHTOWER_ROLLING_RESTART: "true" # 每次只停止并更新一个容器
     network_mode: "host"
 
-  snapdrop:
-    image: linuxserver/snapdrop
-    container_name: snapdrop
+  pairdrop:
+    image: linuxserver/pairdrop
+    container_name: pairdrop
     labels:
+      #com.centurylinklabs.watchtower.enable: true  # 带标签 确定watchtower可以定位更新
       net.unraid.docker.icon: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/leesonaa/icons/main/icons1/Snapdrop_A.png"
       net.unraid.docker.webui: "http://[IP]:[PORT:84]"
     environment:
       <<: *env
-    volumes:
-      - ${DATA_PATH}/snapdrop:/config
     ports:
       - 84:80
     <<: *conf
@@ -316,6 +315,7 @@ services:
     environment:
       UID: "99"
       GID: "100"
+      #QB_EE_BIN: "true"      # 这是启动EE增强版 反迅雷吸血
       QB_WEBUI_PORT: "8989"
       QB_TRACKERS_UPDATE_AUTO: "true"
       QB_TRACKERS_LIST_URL: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
